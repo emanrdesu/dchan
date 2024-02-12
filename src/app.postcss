@@ -2,3 +2,58 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+.menú > * {
+   @apply btn btn-ghost font-normal rounded-md normal-case blout btn-sm px-0 py-0;
+}
+
+.spoiler {
+   background-color: currentColor;
+   border-radius: 2px;
+   opacity: 0.8;
+   transition: opacity 200ms ease, background-color 300ms ease;
+}
+
+.spoiler:hover {
+   opacity: 1;
+   background-color: transparent;
+}
+
+.blout:focus {
+   @apply outline-none focus:outline-none blink text-secondary;
+}
+
+.blink {
+   animation: blink 400ms infinite alternate;
+}
+
+@keyframes blink {
+   from {
+      opacity: 0.5;
+   }
+   to {
+      opacity: 1;
+   }
+}
+
+::-webkit-scrollbar {
+   width: 0;
+   background: transparent;
+}
+
+::-moz-scrollbar {
+   width: 0;
+   background: transparent;
+}
+::-o-scrollbar {
+   width: 0;
+   background: transparent;
+}
+::-ms-scrollbar {
+   width: 0;
+   background: transparent;
+}
+::-scrollbar {
+   width: 0;
+   background: transparent;
+}
