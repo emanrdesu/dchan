@@ -27,3 +27,6 @@ Is an anoymous imageboard with optional accounts that let you "attach" informati
 ![Board](/static/board.png)
 ![Post](/static/post.png)
 ![Thread](/static/thread.png)
+
+## Setup
+Since it's not hosted yet, to see it in a localhost version. Just run `npm run dev -- --open` and `./pocketbase serve` in the root directory after downloading pocketbase onto the directory and installing packages.
