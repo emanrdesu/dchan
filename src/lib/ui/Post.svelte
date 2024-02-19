@@ -3,6 +3,7 @@
    import { sign, format, icons, mininfo } from '$lib/misc'
    import { blur, fly } from 'svelte/transition'
    import Header from '$lib/ui/part/Header.svelte'
+
    import Icon from '@iconify/svelte'
    import { cubicInOut } from 'svelte/easing'
 
@@ -15,7 +16,7 @@
    const mediaURL = `/media/${post.id}/${post.media}`
    let full = false
 
-   function onImageClick(e: MouseEvent) {
+   async function onImageClick(e: MouseEvent) {
       if (e.ctrlKey) {
          window.open(mediaURL, '_blank')
       } else {
@@ -115,27 +116,26 @@
       {#if post.media}
          {@const filename = format.filename(post.media)}
          <div class="float-left mr-3 form-control items-center">
-            {#key full}
-               <img
-                  in:blur={{ opacity: 0.7 }}
-                  on:click={onImageClick}
-                  on:keydown={() => null}
-                  class:max-h-40={!full}
-                  class:max-h-[90vh]={full}
-                  class:max-w-[160px]={!full}
-                  class:max-w-[85vw]={full}
-                  class="rounded-sm cursor-pointer"
-                  src="{mediaURL}{full ? '' : '?thumb=250x0'}"
-                  alt={op ? 'OP' : 'Post'}
-                  loading="lazy"
-               />
-            {/key}
+            <img
+               on:click={onImageClick}
+               on:keydown={() => null}
+               class:max-h-40={!full}
+               class:max-h-[90vh]={full}
+               class:max-w-[160px]={!full}
+               class:max-w-[85vw]={full}
+               style:transition="all 300ms ease-out"
+               class="rounded-sm cursor-pointer"
+               src="{mediaURL}{full ? '' : '?thumb=250x0'}"
+               alt={op ? 'OP' : 'Post'}
+               loading="lazy"
+            />
+
             <small
                title={filename}
                style:font-size="10px"
                class="overflow-hidden opacity-80 max-w-[158px] whitespace-nowrap"
             >
-               {filename}
+               <a class="link link-hover" target="_blank" href={mediaURL}>{filename}</a>
             </small>
          </div>
       {/if}

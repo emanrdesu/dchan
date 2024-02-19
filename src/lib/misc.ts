@@ -2,7 +2,6 @@ import { escape } from 'html-escaper'
 import type { gender, race, status } from '$lib/types'
 import { difference, intersection } from 'lodash'
 import des3 from 'crypto-js/tripledes'
-import crypto from 'crypto'
 import CryptoJS from 'crypto-js'
 
 export function minify(o: object, except = [] as string[], remove = [] as string[]): object {

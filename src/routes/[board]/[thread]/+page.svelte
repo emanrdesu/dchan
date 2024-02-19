@@ -101,8 +101,6 @@
             $menu[0] = false
             input.comment = ''
             input.name = ''
-            // input.gender = 'none'
-            // input.race = 'none'
             if (input.file) input.file.value = ''
          } else {
             showMessage(getError(result.data.form.errors), 'error')

@@ -59,8 +59,8 @@
          <div in:fade class="dropdown dropdown-bottom dropdown-end">
             <div
                tabindex="0"
-               style:transition="background-color 350ms ease"
-               class="w-8 active:p-[2px] flex justify-center rounded-md hover:cursor-pointer"
+               style:transition="all 200ms ease"
+               class="w-8 active:p-[2px] outline-none flex justify-center rounded-md hover:cursor-pointer"
             >
                <img
                   src="https://api.dicebear.com/6.x/{user.avatarStyle}/svg?scale=120&seed={user.avatarSeed}"
