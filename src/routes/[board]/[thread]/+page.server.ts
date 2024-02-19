@@ -1,7 +1,7 @@
 import schema from '$lib/schema'
 import { pb, Boarb, Bread } from '$lib/pocketbase'
 import { error, fail } from '@sveltejs/kit'
-import { getos, deleteReturn, random, format } from '$lib/misc'
+import { deleteReturn, random, format } from '$lib/misc'
 import { setError, superValidate } from 'sveltekit-superforms/server'
 import validate from '$lib/validate'
 

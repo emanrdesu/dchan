@@ -24,6 +24,7 @@
       mile: 4,
       file: undefined as unknown as HTMLInputElement,
       url: false,
+      link: '',
       filename: ''
    }
 
@@ -36,9 +37,9 @@
       fileOk &&
       input.name.length <= 50 &&
       input.subject.length <= 100 &&
-      input.comment.length > 0 &&
-      input.comment.length <= 2000 &&
-      (!input.url || input.filename.length <= 200) &&
+      input.comment.trim().length > 0 &&
+      input.comment.trim().length <= 2000 &&
+      (!input.url || (input.link.trim().length > 0 && input.filename.length <= 200)) &&
       ((data.user.valid && ['mod', 'founder'].includes(data.user.role)) ||
          input.captcha.length == 6)
 
@@ -404,6 +405,7 @@
                   required
                   name="url"
                   placeholder="Link"
+                  bind:value={input.link}
                   class="input input-xs w-1/2"
                />
 
@@ -423,7 +425,9 @@
          <label class="ml-auto flex-grow-0 swap">
             <input
                class="outline-neutral"
-               on:click={() => (input.url = !input.url)}
+               on:click={() => {
+                  fileOk = input.url = !input.url
+               }}
                type="checkbox"
             />
             <div class="swap-on">

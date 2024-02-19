@@ -70,6 +70,7 @@
       sage: false,
       file: undefined as unknown as HTMLInputElement,
       url: false,
+      link: '',
       filename: ''
    }
 
@@ -79,7 +80,8 @@
    $: canSubmit =
       (!fileGiven || (fileGiven && fileOk)) &&
       input.name.length <= 50 &&
-      (fileGiven || input.comment.length > 0) &&
+      (fileGiven ||
+         (input.url && (input.link.trim().length > 0 || input.comment.trim().length > 0))) &&
       input.comment.length <= 2000 &&
       (!input.url || input.filename.length <= 200) &&
       ((data.user.valid && ['mod', 'founder'].includes(data.user.role)) ||
@@ -270,6 +272,7 @@
                   tabindex={$menu[0] ? 0 : -1}
                   name="url"
                   placeholder="Link"
+                  bind:value={input.link}
                   class="input input-xs w-1/2"
                />
 
