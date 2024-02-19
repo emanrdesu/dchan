@@ -1,6 +1,7 @@
 <script lang="ts">
    import { keyboardClick } from '$lib/misc'
    import Icon from '@iconify/svelte'
+   import { fade } from 'svelte/transition'
 
    export let name: string
    export let icon: string
@@ -14,7 +15,7 @@
    let active = false
 </script>
 
-<div class="{add} tooltip" data-tip={tip}>
+<div transition:fade|local class="{add} tooltip" data-tip={tip}>
    <div
       tabindex={interact ? 0 : -1}
       class:opacity-30={!active}

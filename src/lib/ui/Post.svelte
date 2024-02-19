@@ -1,7 +1,7 @@
 <script lang="ts">
    import type { Board, Post, Thread } from '$lib/types'
    import { sign, format, icons, mininfo } from '$lib/misc'
-   import { fly } from 'svelte/transition'
+   import { blur, fly } from 'svelte/transition'
    import Header from '$lib/ui/part/Header.svelte'
    import Icon from '@iconify/svelte'
    import { cubicInOut } from 'svelte/easing'
@@ -115,18 +115,21 @@
       {#if post.media}
          {@const filename = format.filename(post.media)}
          <div class="float-left mr-3 form-control items-center">
-            <img
-               on:click={onImageClick}
-               on:keydown={() => null}
-               class:max-h-40={!full}
-               class:max-h-[90vh]={full}
-               class:max-w-[160px]={!full}
-               class:max-w-[85vw]={full}
-               class="rounded-sm cursor-pointer"
-               src="{mediaURL}{full ? '' : '?thumb=250x0'}"
-               alt={op ? 'OP' : 'Post'}
-               loading="lazy"
-            />
+            {#key full}
+               <img
+                  in:blur={{ opacity: 0.7 }}
+                  on:click={onImageClick}
+                  on:keydown={() => null}
+                  class:max-h-40={!full}
+                  class:max-h-[90vh]={full}
+                  class:max-w-[160px]={!full}
+                  class:max-w-[85vw]={full}
+                  class="rounded-sm cursor-pointer"
+                  src="{mediaURL}{full ? '' : '?thumb=250x0'}"
+                  alt={op ? 'OP' : 'Post'}
+                  loading="lazy"
+               />
+            {/key}
             <small
                title={filename}
                style:font-size="10px"

@@ -56,6 +56,7 @@ export interface Post extends Record {
    subject: string
    comment: string
    media: File
+   mediaHash: string
    country: string
    gender: gender | null
    race: race | null

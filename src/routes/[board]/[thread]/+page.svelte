@@ -81,7 +81,8 @@
       (!fileGiven || (fileGiven && fileOk)) &&
       input.name.length <= 50 &&
       (fileGiven ||
-         (input.url && (input.link.trim().length > 0 || input.comment.trim().length > 0))) &&
+         (input.url && input.link.trim().length > 0) ||
+         input.comment.trim().length > 0) &&
       input.comment.length <= 2000 &&
       (!input.url || input.filename.length <= 200) &&
       ((data.user.valid && ['mod', 'founder'].includes(data.user.role)) ||

@@ -49,10 +49,15 @@ export async function Boarb(name: string) {
                   all: breads,
                   archived: breads.filter((t) => t.archived),
 
-                  normal(sticky = false) {
+                  normal(sticky = false): Thread[] {
                      return breads
                         .filter((t) => !t.archived)
                         .filter((t) => (sticky ? true : !t.sticky))
+                  },
+
+                  async hashList(): Promise<string[]> {
+                     const ops = await this.ops()
+                     return ops.map((op) => op.mediaHash)
                   },
 
                   async ops(): Promise<Post[]> {
@@ -125,6 +130,11 @@ export async function Bread(board: string, thread: string) {
                filter: `thread = "${bread.id}"`,
                sort: 'created'
             })
+         },
+
+         async hashList() {
+            const posts = await this.posts()
+            return posts.map((p) => p.mediaHash)
          },
 
          async climb() {

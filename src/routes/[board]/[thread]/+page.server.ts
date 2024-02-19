@@ -1,7 +1,7 @@
 import schema from '$lib/schema'
 import { pb, Boarb, Bread } from '$lib/pocketbase'
 import { error, fail } from '@sveltejs/kit'
-import { deleteReturn, random, format } from '$lib/misc'
+import { deleteReturn, random, format, calculateMD5 } from '$lib/misc'
 import { setError, superValidate } from 'sveltekit-superforms/server'
 import validate from '$lib/validate'
 
@@ -31,7 +31,12 @@ export const actions: Actions = {
       const form = await superValidate(formData, schema.post)
 
       let board: Board, boarb, thread: Thread, bread
-      let user, quotes: number[] | undefined, file: File | null, filename: string
+      let user,
+         quotes: number[] | undefined,
+         file: File | null,
+         hash: string | null,
+         filename: string
+      hash = null
 
       const err = (field: any, message: string, status = 400) => {
          setError(form, field, message)
@@ -71,6 +76,20 @@ export const actions: Actions = {
             if (!(user.valid && ['mod', 'founder'].includes(user.role)))
                return err('name', 'Thread is archived')
 
+         if (thread.verified) {
+            if (user.valid) {
+               if (!['mod', 'founder'].includes(user.role) && user.verified) {
+                  if (!thread.genders.includes(user.gender))
+                     return err('gender', `${user.gender.titleCase()}s not allowed`)
+
+                  if (!thread.races.includes(user.race))
+                     return err('race', `${user.race.titleCase()} people not allowed`)
+               }
+            } else {
+               return err('name', 'Must be logged in to post')
+            }
+         }
+
          // quotes (not validation)
          quotes = form.data.comment.match(/>>\d+/g)?.map((q) => +q.slice(2))
 
@@ -99,6 +118,19 @@ export const actions: Actions = {
 
             if (valid) file = zile
             else return err(field, message)
+
+            if (file) {
+               try {
+                  hash = await calculateMD5(file)
+                  const hashList = await bread.hashList()
+
+                  if (hashList.includes(hash)) {
+                     return err('file', 'File already exists')
+                  }
+               } catch {
+                  return err('file', 'Error calculating MD5 hash')
+               }
+            }
          }
       }
 
@@ -117,6 +149,7 @@ export const actions: Actions = {
             race: form.data.race != 'none' && form.data.race,
             canDM: form.data.DMs,
             media: file,
+            mediaHash: hash,
             replies: ' '
          }
 

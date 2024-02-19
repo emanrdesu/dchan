@@ -65,7 +65,7 @@
 
    <div class="flex flex-wrap">
       {#each post.replies.match(/\d+/g) || [] as reply}
-         {@const size = 20}
+         {@const size = 18}
          {@const icon = 'basil:reply-solid'}
          <span
             class="cursor-pointer"

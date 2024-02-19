@@ -2,7 +2,7 @@ import schema from '$lib/schema'
 import { pb, Boarb } from '$lib/pocketbase'
 import { intersection } from 'lodash'
 import { error, fail } from '@sveltejs/kit'
-import { random, deleteReturn, format } from '$lib/misc'
+import { random, deleteReturn, format, calculateMD5 } from '$lib/misc'
 import { setError, superValidate } from 'sveltekit-superforms/server'
 import type { Actions } from './$types'
 import type { Board, Post } from '../../lib/types'
@@ -35,7 +35,8 @@ export const actions: Actions = {
       const form = await superValidate(formData, schema.thread)
 
       let board: Board, boarb
-      let user, genders, races, file: File | null, filename: string
+      let user, genders, races, file: File | null, hash: string | null, filename: string
+      hash = null
 
       const err = (field: any, message: string, status = 400) => {
          setError(form, field, message)
@@ -91,6 +92,20 @@ export const actions: Actions = {
 
             if (valid) file = zile
             else return err(field, message)
+
+            if (file) {
+               try {
+                  hash = await calculateMD5(file)
+                  const ops = await boarb.catalog.threads()
+                  const hashList = await ops.hashList()
+
+                  if (hashList.includes(hash)) {
+                     return err('file', 'File already exists')
+                  }
+               } catch {
+                  return err('file', 'Error calculating MD5 hash')
+               }
+            }
          }
 
          // sticky/closed
@@ -135,6 +150,7 @@ export const actions: Actions = {
             race: form.data.race != 'none' && form.data.race,
             canDM: form.data.DMs,
             media: file,
+            mediaHash: hash,
             replies: ' '
          }
 

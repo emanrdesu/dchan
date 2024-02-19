@@ -2,6 +2,8 @@ import { escape } from 'html-escaper'
 import type { gender, race, status } from '$lib/types'
 import { difference, intersection } from 'lodash'
 import des3 from 'crypto-js/tripledes'
+import crypto from 'crypto'
+import CryptoJS from 'crypto-js'
 
 export function minify(o: object, except = [] as string[], remove = [] as string[]): object {
    const useless = ['collectionId', 'collectionName', 'expand', 'id', 'updated', 'created']
@@ -215,11 +217,16 @@ export const sign = {
    }
 }
 
-export function copyToClipboard(text) {
+export function copyToClipboard(text: string) {
    const textarea = document.createElement('textarea')
    textarea.value = text
    document.body.appendChild(textarea)
    textarea.select()
    document.execCommand('copy')
    document.body.removeChild(textarea)
+}
+
+export async function calculateMD5(file: File) {
+   const wordArray = CryptoJS.lib.WordArray.create(await file.arrayBuffer())
+   return CryptoJS.MD5(wordArray).toString(CryptoJS.enc.Hex)
 }
