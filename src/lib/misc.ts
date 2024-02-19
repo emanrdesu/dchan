@@ -1,5 +1,5 @@
 import { escape } from 'html-escaper'
-import type { gender, race, os, status } from '$lib/types'
+import type { gender, race, status } from '$lib/types'
 import { difference, intersection } from 'lodash'
 import des3 from 'crypto-js/tripledes'
 
@@ -43,8 +43,8 @@ export const icons = {
       { race: 'white', icon: 'emojione:glass-of-milk' },
       { race: 'black', icon: 'fluent-emoji-flat:watermelon' },
       { race: 'latino', icon: 'twemoji:taco' },
-      { race: 'asian', icon: 'fluent-emoji-flat:chopsticks' },
-      { race: 'indian', icon: 'twemoji:curry-rice' },
+      { race: 'asian', icon: 'noto:rice-ball' },
+      { race: 'indian', icon: 'emojione:pile-of-poo' },
       { race: 'arabic', icon: 'fluent-emoji-flat:camel' },
       { race: 'jewish', icon: 'emojione:star-of-david' }
    ],
@@ -55,20 +55,12 @@ export const icons = {
       // { gender: 'trans', color: 'text-purple-300', icon: 'la:transgender' }
    ],
 
-   os: [
-      { os: 'android', icon: 'devicon:android' },
-      { os: 'windows', icon: 'devicon:windows8' },
-      { os: 'linux', icon: 'devicon:linux' },
-      { os: 'apple', icon: 'openmoji:apple' },
-      { os: 'ios', icon: 'mdi:apple-ios' }
-   ],
-
    status: [
       { status: 'sticky', icon: 'pajamas:thumbtack-solid', color: 'text-info' },
       { status: 'closed', icon: 'foundation:lock', color: 'text-primary' }
    ],
 
-   get(attr: 'race' | 'gender' | 'os' | 'status', value: gender | race | os | status) {
+   get(attr: 'race' | 'gender' | 'status', value: gender | race | status) {
       for (const x of this[attr]) if (x[attr] == value) return x
    }
 }
@@ -83,16 +75,6 @@ export const keyboardClick = (e: KeyboardEvent) => {
    }
 
    if (e.code != 'Tab') e.preventDefault()
-}
-
-export function getos(userAgent: string): string {
-   if (/android/i.test(userAgent)) return 'android'
-   if (/windows/i.test(userAgent)) return 'windows'
-   if (/linux/i.test(userAgent)) return 'linux'
-   if (/macintosh/i.test(userAgent)) return 'apple'
-   if (/iphone|ipad/i.test(userAgent)) return 'ios'
-
-   return 'unknown'
 }
 
 export const format = {

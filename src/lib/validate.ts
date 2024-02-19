@@ -21,16 +21,6 @@ export default {
       return this.ok()
    },
 
-   latitude(n: string) {
-      const x = +n
-      return -90 <= x && x <= 90
-   },
-
-   longitude(n: string) {
-      const x = +n
-      return -180 <= x && x <= 180
-   },
-
    async captcha(text: string | undefined, user: User) {
       if (text) {
          try {

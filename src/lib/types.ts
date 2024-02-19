@@ -1,9 +1,8 @@
 import type { Record } from 'pocketbase'
 
 export type race = 'white' | 'black' | 'latino' | 'asian' | 'indian' | 'arabic' | 'jewish'
-export type gender = 'male' | 'female' // | 'trans'
+export type gender = 'male' | 'female'
 export type role = 'user' | 'mod' | 'janitor' | 'founder'
-export type os = 'android' | 'windows' | 'linux' | 'apple' | 'ios'
 export type status = 'sticky' | 'closed'
 export type avatarStyle = 'lorelei' | 'notionists' | 'micah' | 'open-peeps' | 'croodles'
 
@@ -29,7 +28,6 @@ export interface Board extends Record {
    genders: string[]
    races: string[]
    nsfw: boolean
-   os: boolean
    imageOnly: boolean
    threadCap: number
    bumpLimit: number

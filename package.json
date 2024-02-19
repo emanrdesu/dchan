@@ -46,7 +46,6 @@
 		"html-escaper": "^3.0.3",
 		"lodash": "^4.17.21",
 		"pocketbase": "^0.14.4",
-		"svelte-icons": "^2.1.0",
 		"svg-captcha": "^1.4.0",
 		"theme-change": "^2.5.0"
 	}

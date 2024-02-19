@@ -6,16 +6,11 @@
 
    import Menu from '$lib/ui/Menu.svelte'
    import IconCopy from '$lib/ui/IconCopy.svelte'
-
-   import FaHome from 'svelte-icons/fa/FaHome.svelte'
-   import FaUserAltSlash from 'svelte-icons/fa/FaUserAltSlash.svelte'
-   import IoIosSettings from 'svelte-icons/io/IoIosSettings.svelte'
    import IconText from '$lib/ui/IconText.svelte'
 
    import type { LayoutServerData } from './$types'
    import { goto, invalidate } from '$app/navigation'
    import { fade } from 'svelte/transition'
-
    import Icon from '@iconify/svelte'
 
    export let data: LayoutServerData
@@ -53,7 +48,7 @@
    <div class="navbar-center ml-auto mr-auto">
       <button class="btn blout btn-ghost text-lg btn-sm px-1" on:click={() => goto('/')}>
          <IconText text="dchan">
-            <FaHome />
+            <Icon icon="ion:home" width={16} />
          </IconText>
       </button>
    </div>
@@ -76,7 +71,7 @@
                <Menu vertical add="dropdown-content rounded-md shadow-lg bg-base-300 translate-y-1">
                   <a href="/settings" tabindex="0">
                      <IconText add="font-bold px-2" text="settings">
-                        <IoIosSettings />
+                        <Icon icon="ant-design:setting-filled" />
                      </IconText>
                   </a>
                   <button tabindex="0" type="submit"><span class="font-bold">logout</span></button>
@@ -89,9 +84,7 @@
                tabindex="0"
                class="btn btn-ghost blout rounded-md normal-case text-xl btn-sm px-1"
             >
-               <div class="w-6">
-                  <FaUserAltSlash />
-               </div>
+               <Icon icon="fa-solid:user-slash" />
             </div>
 
             <div

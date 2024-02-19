@@ -8,7 +8,6 @@ export const pb = new PocketBase('http://127.0.0.1:8090')
 export const cleanup = {
    async captcha() {
       const all = await pb.collection('captcha').getFullList<Captcha>()
-
       const expired = all.filter((c) => +Date.now() - +new Date(c.created) > 6e4)
       expired.forEach((c) => pb.collection('captcha').delete(c.id))
    },
@@ -34,7 +33,7 @@ export async function Boarb(name: string) {
          async updateCount(n = 1) {
             const doarb = await board()
 
-            await pb.collection('board').update(doarb.id, {
+            return pb.collection('board').update(doarb.id, {
                postCount: doarb.postCount + n
             })
          },
