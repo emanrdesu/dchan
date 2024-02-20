@@ -10,7 +10,7 @@
    import IconToggle from '$lib/ui/IconToggle.svelte'
 
    import { afterUpdate, onMount, tick } from 'svelte'
-   import { slide } from 'svelte/transition'
+   import { fly, slide } from 'svelte/transition'
 
    import { onReplyHover, onReplyLeave, onReplyMove, scrollToID } from '$lib/events'
 
@@ -129,7 +129,7 @@
    sign.reset()
 </script>
 
-<div class="ml-3 mb-20">
+<div out:fly class="ml-3">
    <Post post={data.posts[0]} thread={data.thread} board={data.board} op opno={data.posts[0].no} />
 
    <div class="ml-3 mt-2 form-control gap-2">

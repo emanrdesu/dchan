@@ -1,7 +1,7 @@
 <script lang="ts">
    import { superForm } from 'sveltekit-superforms/client'
    import type { PageServerData } from './$types'
-   import { fly } from 'svelte/transition'
+   import { fly, slide } from 'svelte/transition'
    import Icon from '@iconify/svelte'
 
    export let data: PageServerData
@@ -15,7 +15,7 @@
    const categories = Array.from(new Set(boards.map((b) => b.category))) as string[]
 </script>
 
-<div transition:fly class="hero" style:height="93vh">
+<div in:fly={{ delay: 400 }} class="hero" style:height="93vh">
    <div class="hero-content flex-col justify-center text-center">
       <div class="flex flex-col items-center">
          <h1 class="text-7xl self-end mb-2 font-bold">dchan</h1>

@@ -101,7 +101,7 @@
          'hover:h-[120%] hover:w-[130%] hover:-mx-[15%] hover:-translate-x-[0%] hover:z-10'}
       <div
          animate:flip={{ duration: 300 }}
-         in:fade={{ delay: 200 }}
+         in:fade={{ delay: 400 }}
          style:box-shadow="0 0 10px 0 rgba(0,0,0,.2)"
          style:transition="background-color 200ms ease"
          class:cursor-zoom-out={expandHover}
