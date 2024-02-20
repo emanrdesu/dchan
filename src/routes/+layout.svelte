@@ -5,7 +5,7 @@
    import { enhance } from '$app/forms'
 
    import Menu from '$lib/ui/Menu.svelte'
-   import IconCopy from '$lib/ui/IconCopy.svelte'
+
    import IconText from '$lib/ui/IconText.svelte'
 
    import type { LayoutServerData } from './$types'
@@ -18,15 +18,6 @@
    onMount(() => {
       themeChange(false)
    })
-
-   const monedas = [
-      {
-         icon: 'logos:monero',
-         addr: '42TC9QdYoMrFiY7LjfQ9GQ44XevmYu8KqGLjRhSemrsxetbKoEoAu54RjLGC2VJsSgeiNRt6q1iR3CetbjbRUgcwHv6woT8'
-      },
-      { icon: 'logos:bitcoin', addr: 'bc1q7h0cvne2286z6sj8d9kkfs40trttcf8tdr0ltv' },
-      { icon: 'simple-icons:litecoin', addr: 'Lfah3SLM3aw1EwsCmV763uaRdkS54ye8HS' }
-   ]
 </script>
 
 <div class="navbar sticky top-0 px-0 py-[2px] z-20 justify-center bg-base-300 min-h-8">
@@ -126,19 +117,3 @@
 </div>
 
 <slot />
-
-<!-- <footer class="flex flex-row p-4 text-neutral-content">
-   <small class="flex items-center gap-1">
-      Copyright
-      <Icon icon="ri:copyright-fill" />
-      {new Date().getFullYear()}
-   </small>
-
-   <small class="flex items-center gap-2">
-      {#each monedas as { icon, addr }}
-         <IconCopy {icon} text={addr} />
-      {/each}
-   </small>
-
-   <a class="link link-hover" href="mailto:janitor@waifu.club"><small>Contact</small></a>
-</footer> -->
