@@ -19,6 +19,7 @@ export function minify(o: object, except = [] as string[], remove = [] as string
 
    for (const [key, value] of Object.entries(o)) {
       if ((useless.includes(key) || remove.includes(key)) && !except.includes(key)) continue
+      // @ts-ignore
       copy[key] = minify(value, except, remove)
    }
 
@@ -26,6 +27,19 @@ export function minify(o: object, except = [] as string[], remove = [] as string
 }
 
 // stdlib addition
+
+declare global {
+   interface String {
+      titleCase: () => string
+   }
+}
+
+declare global {
+   interface Array<T> {
+      promise: (x: T) => Promise<any[]>
+   }
+}
+
 String.prototype.titleCase = function () {
    return this.charAt(0).toUpperCase() + this.slice(1)
 }
@@ -40,39 +54,35 @@ export function show(o: any) {
 }
 
 export const icons = {
-   race: [
-      { race: 'white', icon: 'emojione:glass-of-milk' },
-      { race: 'black', icon: 'fluent-emoji-flat:watermelon' },
-      { race: 'latino', icon: 'twemoji:taco' },
-      { race: 'asian', icon: 'noto:rice-ball' },
-      { race: 'indian', icon: 'emojione:pile-of-poo' },
-      { race: 'arabic', icon: 'fluent-emoji-flat:camel' },
-      { race: 'jewish', icon: 'emojione:star-of-david' }
-   ],
+   race: {
+      white: 'emojione:glass-of-milk',
+      black: 'fluent-emoji-flat:watermelon',
+      latino: 'twemoji:taco',
+      asian: 'noto:rice-ball',
+      indian: 'emojione:pile-of-poo',
+      arabic: 'fluent-emoji-flat:camel',
+      jewish: 'emojione:star-of-david'
+   },
 
-   gender: [
-      { gender: 'male', color: 'text-blue-300', icon: 'material-symbols:male' },
-      { gender: 'female', color: 'text-pink-300', icon: 'material-symbols:female' }
-      // { gender: 'trans', color: 'text-purple-300', icon: 'la:transgender' }
-   ],
+   gender: {
+      male: { color: 'text-blue-300', icon: 'material-symbols:male' },
+      female: { color: 'text-pink-300', icon: 'material-symbols:female' }
+   },
 
-   status: [
-      { status: 'sticky', icon: 'pajamas:thumbtack-solid', color: 'text-info' },
-      { status: 'closed', icon: 'foundation:lock', color: 'text-primary' }
-   ],
-
-   get(attr: 'race' | 'gender' | 'status', value: gender | race | status) {
-      for (const x of this[attr]) if (x[attr] == value) return x
+   status: {
+      sticky: { icon: 'pajamas:thumbtack-solid', color: 'text-info' },
+      closed: { icon: 'foundation:lock', color: 'text-primary' }
    }
 }
 
-export const races = icons.race.map((o) => o.race)
-export const genders = icons.gender.map((o) => o.gender)
+export const races = Object.keys(icons.race) as race[]
+export const genders = Object.keys(icons.gender) as gender[]
+export const stati = Object.keys(icons.status) as status[]
 export const avatarStyles = ['lorelei', 'notionists', 'micah', 'open-peeps', 'croodles']
 
 export const keyboardClick = (e: KeyboardEvent) => {
    if (e.code == 'Space' || e.code == 'Enter') {
-      e.target.click()
+      if (e.target) (e.target as HTMLButtonElement).click()
    }
 
    if (e.code != 'Tab') e.preventDefault()
@@ -84,6 +94,7 @@ export const format = {
       const options = [{ year: '2-digit', month: '2-digit', day: '2-digit' }, { weekday: 'short' }]
 
       return (
+         // @ts-ignore
          options.map((o) => date.toLocaleDateString('en-US', o)).join(' ') +
          ' ' +
          date.toTimeString().split(' ')[0]
@@ -164,8 +175,8 @@ export const format = {
          .replace(/[\n]/g, '<br>') // newline
    },
 
-   filename(name: string) {
-      return name.replace(/_[^_]+\.(png|jpg|gif|jpeg)/g, '.$1').replace(/_/g, ' ')
+   filename(name: string | File) {
+      return (name as string).replace(/_[^_]+\.(png|jpg|gif|jpeg)/g, '.$1').replace(/_/g, ' ')
    }
 }
 
@@ -183,6 +194,7 @@ export const random = {
    }
 }
 
+// @ts-ignore
 export function bool(x) {
    return x ? true : false
 }
@@ -226,6 +238,7 @@ export function copyToClipboard(text: string) {
 }
 
 export async function calculateMD5(file: File) {
+   // @ts-ignore
    const wordArray = CryptoJS.lib.WordArray.create(await file.arrayBuffer())
    return CryptoJS.MD5(wordArray).toString(CryptoJS.enc.Hex)
 }

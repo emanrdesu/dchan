@@ -1,8 +1,9 @@
 <script lang="ts">
    import { superForm } from 'sveltekit-superforms/client'
    import type { PageServerData } from './$types'
-   import { fly, slide } from 'svelte/transition'
+   import { fly } from 'svelte/transition'
    import Icon from '@iconify/svelte'
+   import type { Category } from '$lib/types'
 
    export let data: PageServerData
 
@@ -11,7 +12,7 @@
    })
 
    const boards = data.boards
-   boards.forEach((b) => (b.category = b.expand.category.name))
+   boards.forEach((b) => (b.category = (b.expand.category as Category).name))
    const categories = Array.from(new Set(boards.map((b) => b.category))) as string[]
 </script>
 
@@ -33,13 +34,16 @@
                         href="/{board.name}"
                      >
                         <span>{board.description + ' ➜ '}</span>
-                        <span class="flex items-center"
-                           >{#if board.icon}<span class="translate-x-[3px]">/</span><span
-                                 style:color={board.color}
-                              >
-                                 <Icon icon={board.icon} width="22" height="22" /></span
-                              ><span class="-translate-x-1">/</span>{:else}/{board.name}/{/if}</span
-                        >
+                        <span class="flex items-center">
+                           {#if board.icon}
+                              <span class="translate-x-[3px]">/</span>
+                              <span style:color={board.color}>
+                                 <Icon icon={board.icon} width="22" height="22" />
+                              </span>
+                              <span class="-translate-x-1">/</span>
+                           {:else}/{board.name}/
+                           {/if}
+                        </span>
                      </a>
                   {/each}
                </div>

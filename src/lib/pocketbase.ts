@@ -70,6 +70,7 @@ export async function Boarb(name: string) {
 
                         ops.push({
                            ...minify(op, ['id']),
+                           // @ts-ignore
                            thread: minify(thread, [], ['board'])
                         })
                      }
@@ -81,6 +82,7 @@ export async function Boarb(name: string) {
 
             async shift(s = 1) {
                const threads = (await this.threads()).normal()
+               // @ts-ignore
                return threads.promise((t) =>
                   pb.collection('thread').update(t.id, {
                      index: t.index + s
@@ -91,14 +93,17 @@ export async function Boarb(name: string) {
             async archive() {
                const threads = await this.threads()
 
-               return threads
-                  .normal()
-                  .filter((t) => t.index > doarb.threadCap)
-                  .promise((t) =>
-                     pb.collection('thread').update(t.id, {
-                        archived: true
-                     })
-                  )
+               return (
+                  threads
+                     .normal()
+                     .filter((t) => t.index > doarb.threadCap)
+                     // @ts-ignore
+                     .promise((t) =>
+                        pb.collection('thread').update(t.id, {
+                           archived: true
+                        })
+                     )
+               )
             }
          }
       }

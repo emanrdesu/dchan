@@ -5,6 +5,7 @@ import type { Board, Thread, User } from './types'
 export default {
    ok(change = {}) {
       const def = { valid: true, message: '', field: '', zile: new File([], '') }
+      // @ts-ignore
       for (const p in change) def[p] = change[p]
       return def
    },

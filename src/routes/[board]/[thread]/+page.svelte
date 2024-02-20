@@ -2,7 +2,7 @@
    import Icon from '@iconify/svelte'
    import { superForm } from 'sveltekit-superforms/client'
    import { menu, setMenu } from '$lib/stores'
-   import { regex, bool, icons, keyboardClick, sign } from '$lib/misc'
+   import { regex, bool, icons, keyboardClick, sign, genders } from '$lib/misc'
 
    import Window from '$lib/ui/Window.svelte'
    import Captcha from '$lib/ui/Captcha.svelte'
@@ -36,7 +36,9 @@
 
             listeners.set(q, qlisteners)
 
+            // prettier-ignore
             for (const [listener, action] of Object.entries(qlisteners))
+            // @ts-ignore
                q.addEventListener(listener, action)
          }
       })
@@ -98,6 +100,7 @@
             input.name = ''
             if (input.file) input.file.value = ''
          } else {
+            // @ts-ignore
             showMessage(getError(result.data.form.errors), 'error')
          }
       }
@@ -205,7 +208,9 @@
                      value="none"
                   />
 
-                  {#each icons.gender as { gender, color, icon }}
+                  {#each genders as gender}
+                     {@const { color, icon } = icons.gender[gender]}
+
                      {#if data.thread.genders.includes(gender)}
                         <div class="flex {color} items-center">
                            <input

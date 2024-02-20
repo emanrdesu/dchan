@@ -33,7 +33,7 @@
       <div class="flex">
          {#if post.race}
             {@const size = 15}
-            {@const { icon } = icons.get('race', post.race)}
+            {@const icon = icons.race[post.race]}
             <div class="tooltip tooltip-bottom" data-tip={post.race}>
                <Icon {icon} width={size} height={size} />
             </div>
@@ -41,7 +41,7 @@
 
          {#if post.gender}
             {@const size = 15}
-            {@const { icon, color } = icons.get('gender', post.gender)}
+            {@const { icon, color } = icons.gender[post.gender]}
             <div class="tooltip tooltip-bottom" data-tip={post.gender}>
                <Icon class={color} {icon} width={size} height={size} />
             </div>

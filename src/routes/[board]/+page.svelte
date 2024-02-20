@@ -8,7 +8,17 @@
    import { tick } from 'svelte'
    import { superForm } from 'sveltekit-superforms/client'
    import { menu, setMenu } from '$lib/stores'
-   import { bool, format, icons, keyboardClick, regex, mininfo } from '$lib/misc'
+   import {
+      bool,
+      format,
+      icons,
+      keyboardClick,
+      regex,
+      mininfo,
+      genders,
+      races,
+      stati
+   } from '$lib/misc'
 
    export let data
 
@@ -61,6 +71,7 @@
             input.subject = ''
             if (input.file) input.file.value = ''
          } else {
+            //@ts-ignore
             showMessage(getError(result.data.form.errors), 'error')
          }
       }
@@ -110,25 +121,34 @@
                 form-control items-center bg-base-100 rounded-md"
       >
          <span class="self-start w-full flex items-center justify-stretch gap-1 mb-1 flex-wrap">
-            {#each [['post', 'ic:sharp-reply', 'success'], ['image', 'material-symbols:image', 'warning']] as [prop, icon, style]}
-               {@const count = op.thread[prop + 'Count']}
-               <span
-                  class="flex tooltip tooltip-bottom items-center"
-                  data-tip="{count} {prop}{count == 1 ? '' : 's'}"
-               >
-                  <div class="text-{style}">
-                     <Icon {icon} width={14} height={14} />
-                  </div>
-                  <small
-                     class:text-primary-focus={count >= data.board.bumpLimit}
-                     class:text-neutral-content={count < data.board.bumpLimit}
-                     class="text-xs">{count}</small
+            {#if true}
+               {@const postInfo = [
+                  ['post', 'ic:sharp-reply', 'success'],
+                  ['image', 'material-symbols:image', 'warning']
+               ]}
+
+               {#each postInfo as [prop, icon, style]}
+                  {@const count = op.thread[prop + 'Count']}
+                  <span
+                     class="flex tooltip tooltip-bottom items-center"
+                     data-tip="{count} {prop}{count == 1 ? '' : 's'}"
                   >
-               </span>
-            {/each}
+                     <div class="text-{style}">
+                        <Icon {icon} width={14} height={14} />
+                     </div>
+                     <small
+                        class:text-primary-focus={count >= data.board.bumpLimit}
+                        class:text-neutral-content={count < data.board.bumpLimit}
+                        class="text-xs">{count}</small
+                     >
+                  </span>
+               {/each}
+            {/if}
 
             {#if op.thread.sticky || op.thread.closed}
-               {#each icons.status as { status, icon, color }}
+               {#each stati as status}
+                  {@const { icon, color } = icons.status[status]}
+
                   {#if op.thread[status]}
                      <span class="tooltip tooltip-bottom" data-tip={status}>
                         <div class={color}>
@@ -149,7 +169,9 @@
 
             {#if op.thread.genders.length < data.board.genders.length}
                {@const { exclude, array } = mininfo(op.thread.genders, data.board.genders)}
-               {#each icons.gender as { gender, icon, color }}
+               {#each genders as gender}
+                  {@const { icon, color } = icons.gender[gender]}
+
                   {#if array.includes(gender)}
                      <div
                         class="tooltip tooltip-bottom"
@@ -163,7 +185,9 @@
 
             {#if op.thread.races.length < data.board.races.length}
                {@const { exclude, array } = mininfo(op.thread.races, data.board.races)}
-               {#each icons.race as { race, icon }}
+               {#each races as race}
+                  {@const icon = icons.race[race]}
+
                   {#if array.includes(race)}
                      <div
                         class="tooltip tooltip-bottom"
@@ -277,7 +301,9 @@
                      value="none"
                   />
 
-                  {#each icons.gender as { gender, color, icon }}
+                  {#each genders as gender}
+                     {@const { color, icon } = icons.gender[gender]}
+
                      {#if data.board.genders.includes(gender)}
                         <div class="flex {color} items-center">
                            <input
@@ -344,7 +370,9 @@
                />
             {/if}
 
-            {#each icons.gender as { gender, color, icon }}
+            {#each genders as gender}
+               {@const { color, icon } = icons.gender[gender]}
+
                {#if data.board.genders.includes(gender)}
                   <IconToggle
                      bind:interact={$menu[0]}
@@ -357,7 +385,9 @@
                {/if}
             {/each}
 
-            {#each icons.race as { race, icon }}
+            {#each races as race}
+               {@const icon = icons.race[race]}
+
                {#if data.board.races.includes(race)}
                   <IconToggle
                      bind:interact={$menu[0]}
@@ -374,7 +404,8 @@
          {#if data.user.valid && ['founder', 'mod'].includes(data.user.role)}
             <div class="flex gap-1 items-center">
                <div class="badge font-bold badge-sm">thread</div>
-               {#each icons.status as { status, icon, color }}
+               {#each stati as status}
+                  {@const { icon, color } = icons.status[status]}
                   <IconToggle {icon} name={status} {color} bind:interact={$menu[0]} tip={status} />
                {/each}
             </div>

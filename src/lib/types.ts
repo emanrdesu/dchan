@@ -55,7 +55,7 @@ export interface Post extends Record {
    trip: string
    subject: string
    comment: string
-   media: File
+   media: File | string
    mediaHash: string
    country: string
    gender: gender | null
@@ -74,4 +74,8 @@ export interface User extends Record {
    verified: boolean
    avatarStyle: avatarStyle
    avatarSeed: string
+}
+
+export interface Category extends Record {
+   name: string
 }

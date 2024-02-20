@@ -1,10 +1,8 @@
 <script lang="ts">
-   import { tick } from 'svelte'
    import { superForm } from 'sveltekit-superforms/client'
-   import { avatarStyles, icons, keyboardClick } from '$lib/misc'
+   import { avatarStyles, genders, icons, keyboardClick, races } from '$lib/misc'
 
    import Ephemeral from '$lib/ui/Ephemeral.svelte'
-   import FaRegCheckCircle from 'svelte-icons/fa/FaRegCheckCircle.svelte'
    import Icon from '@iconify/svelte'
 
    import type { PageData } from './$types'
@@ -64,7 +62,9 @@
                <Ephemeral duration={3}>
                   <div class="ml-auto alert rounded-lg p-2 py-1 alert-success shadow-lg">
                      <span class="{style.flex1} text-sm">
-                        <div class="w-4"><FaRegCheckCircle /></div>
+                        <div class="w-4">
+                           <Icon icon="mdi:check-circle" />
+                        </div>
                         Registration successful!
                      </span>
                   </div>
@@ -115,7 +115,9 @@
                <div class={style.flex1}>
                   <input type="hidden" name="gender" bind:value={input.gender} />
 
-                  {#each icons.gender as { gender, color, icon }}
+                  {#each genders as gender}
+                     {@const { color, icon } = icons.gender[gender]}
+
                      <div class="tooltip" data-tip={gender}>
                         <div
                            on:click={() => {
@@ -141,7 +143,9 @@
                <div class="{style.flex1} gap-3">
                   <input type="hidden" name="race" bind:value={input.race} />
 
-                  {#each icons.race as { race, icon }}
+                  {#each races as race}
+                     {@const icon = icons.race[race]}
+
                      <div class="tooltip" data-tip={race}>
                         <div
                            tabindex="0"

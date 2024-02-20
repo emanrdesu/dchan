@@ -1,7 +1,7 @@
 <script lang="ts">
    import type { Board, Post, Thread } from '$lib/types'
-   import { sign, format, icons, mininfo } from '$lib/misc'
-   import { blur, fly } from 'svelte/transition'
+   import { sign, format, icons, mininfo, races, genders, stati } from '$lib/misc'
+   import { fly } from 'svelte/transition'
    import Header from '$lib/ui/part/Header.svelte'
 
    import Icon from '@iconify/svelte'
@@ -54,7 +54,8 @@
             {/each}
 
             {#if thread.sticky || thread.closed}
-               {#each icons.status as { status, icon, color }}
+               {#each stati as status}
+                  {@const { icon, color } = icons.status[status]}
                   {#if thread[status]}
                      <span class="tooltip tooltip-bottom" data-tip={status}>
                         <div class={color}>
@@ -73,7 +74,8 @@
 
             {#if thread.genders.length < board.genders.length}
                {@const { exclude, array } = mininfo(thread.genders, board.genders)}
-               {#each icons.gender as { gender, icon, color }}
+               {#each genders as gender}
+                  {@const { color, icon } = icons.gender[gender]}
                   {#if array.includes(gender)}
                      <div
                         class="tooltip tooltip-bottom"
@@ -87,7 +89,8 @@
 
             {#if thread.races.length < board.races.length}
                {@const { exclude, array } = mininfo(thread.races, board.races)}
-               {#each icons.race as { race, icon }}
+               {#each races as race}
+                  {@const icon = icons.race[race]}
                   {#if array.includes(race)}
                      <div
                         class="tooltip tooltip-bottom"

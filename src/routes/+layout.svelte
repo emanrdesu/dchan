@@ -45,7 +45,7 @@
       </div>
    </div>
 
-   <div class="navbar-center ml-auto mr-auto">
+   <div class="navbar-center mx-auto">
       <button class="btn blout btn-ghost text-lg btn-sm px-1" on:click={() => goto('/')}>
          <IconText text="dchan">
             <Icon icon="ion:home" width={16} />
@@ -127,20 +127,18 @@
 
 <slot />
 
-<footer class="mt-10 footer footer-center items-center p-4 gap-3 text-neutral-content">
-   <aside class="items-center justify-center grid-flow-col">
-      <small class="flex items-center gap-1">
-         Copyright
-         <Icon icon="ri:copyright-fill" />
-         {new Date().getFullYear()}
-      </small>
+<!-- <footer class="flex flex-row p-4 text-neutral-content">
+   <small class="flex items-center gap-1">
+      Copyright
+      <Icon icon="ri:copyright-fill" />
+      {new Date().getFullYear()}
+   </small>
 
-      <small class="mx-6 flex items-center gap-2">
-         {#each monedas as { icon, addr }}
-            <IconCopy {icon} text={addr} />
-         {/each}
-      </small>
+   <small class="flex items-center gap-2">
+      {#each monedas as { icon, addr }}
+         <IconCopy {icon} text={addr} />
+      {/each}
+   </small>
 
-      <a class="link link-hover" href="mailto:janitor@waifu.club"><small>Contact</small></a>
-   </aside>
-</footer>
+   <a class="link link-hover" href="mailto:janitor@waifu.club"><small>Contact</small></a>
+</footer> -->
