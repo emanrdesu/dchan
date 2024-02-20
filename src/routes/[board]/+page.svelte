@@ -329,8 +329,8 @@
       <div class="form-control gap-1">
          <!-- requirements -->
          <div class="flex items-center gap-1 flex-wrap">
-            <div class="tooltip" data-tip="who can post in the thread">
-               <div class="badge badge-sm font-bold">require</div>
+            <div class="tooltip" data-tip="what genders or races can be seen">
+               <div class="badge badge-sm font-bold">limit</div>
             </div>
 
             {#if data.user.valid && (data.user.verified || ['mod', 'founder'].includes(data.user.role))}

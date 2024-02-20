@@ -56,16 +56,11 @@
 
    afterUpdate(addQuoteListeners)
 
-   const subset = {
-      genders: data.thread.genders.length < data.board.genders.length,
-      races: data.thread.races.length < data.board.races.length
-   }
-
    const input = {
       name: '',
       comment: '',
-      gender: subset.genders ? undefined : 'none',
-      race: subset.races ? undefined : 'none',
+      gender: 'none',
+      race: 'none',
       captcha: '',
       sage: false,
       file: undefined as unknown as HTMLInputElement,
@@ -200,17 +195,15 @@
                <label class="flex items-center">
                   <div class="badge cursor- font-bold badge-info badge-sm mr-1">Gender</div>
 
-                  {#if !subset.genders}
-                     <input
-                        tabindex={-1}
-                        checked
-                        class="hidden"
-                        type="radio"
-                        name="gender"
-                        bind:group={input.gender}
-                        value="none"
-                     />
-                  {/if}
+                  <input
+                     tabindex={-1}
+                     checked
+                     class="hidden"
+                     type="radio"
+                     name="gender"
+                     bind:group={input.gender}
+                     value="none"
+                  />
 
                   {#each icons.gender as { gender, color, icon }}
                      {#if data.thread.genders.includes(gender)}
@@ -218,7 +211,6 @@
                            <input
                               tabindex={$menu[0] ? 0 : -1}
                               type="radio"
-                              required={subset.genders}
                               name="gender"
                               value={gender}
                               bind:group={input.gender}
@@ -240,7 +232,7 @@
                      name="race"
                      class="select select-xs"
                   >
-                     {#if !subset.races}<option value="none">None</option>{/if}
+                     <option value="none">None</option>
                      {#each data.thread.races as race}
                         <option value={race}>{race.titleCase()}</option>
                      {/each}
