@@ -155,6 +155,7 @@
                            class="cursor-pointer"
                            on:keydown={(e) => {
                               if (e.code == 'Space' || e.code == 'Enter') {
+                                 // @ts-ignore
                                  e.target.click()
                               }
                            }}

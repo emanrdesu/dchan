@@ -7,7 +7,7 @@ import validate from '$lib/validate'
 
 import type { Actions } from './$types'
 import type { PageServerLoad } from './$types'
-import type { Board, Post, Thread } from '$lib/types'
+import type { Board, Post, Thread, User } from '$lib/types'
 
 export const load: PageServerLoad = async ({ params, fetch }) => {
    const form = await superValidate(schema.post)
@@ -31,7 +31,7 @@ export const actions: Actions = {
       const form = await superValidate(formData, schema.post)
 
       let board: Board, boarb, thread: Thread, bread
-      let user,
+      let user: User,
          quotes: number[] | undefined,
          file: File | null,
          hash: string | null,
@@ -77,6 +77,18 @@ export const actions: Actions = {
                return err('name', 'Thread is archived')
 
          if (thread.verified) {
+            console.log(user.role)
+            console.log(user.gender)
+            console.log(user.race)
+
+            console.log()
+
+            console.log(thread.races)
+            console.log(thread.genders)
+
+            console.log(thread.genders.includes(user.gender))
+            console.log(thread.races.includes(user.race))
+
             if (user.valid) {
                if (!['mod', 'founder'].includes(user.role) && user.verified) {
                   if (!thread.genders.includes(user.gender))
@@ -84,6 +96,8 @@ export const actions: Actions = {
 
                   if (!thread.races.includes(user.race))
                      return err('race', `${user.race.titleCase()} people not allowed`)
+               } else {
+                  return err('name', 'Must be verified to post')
                }
             } else {
                return err('name', 'Must be logged in to post')
@@ -155,8 +169,10 @@ export const actions: Actions = {
 
          const postFormData = new FormData()
 
-         for (const [key, value] of Object.entries(postData))
+         for (const [key, value] of Object.entries(postData)) {
+            // @ts-ignore
             if (value) postFormData.append(key, value)
+         }
 
          try {
             const post = await pb.collection('post').create<Post>(postFormData)

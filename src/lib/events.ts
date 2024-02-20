@@ -63,7 +63,9 @@ export function onReplyMove(id: string) {
       const copy = document.getElementById(`copy${id}`)
 
       if (copy) {
+         // @ts-ignore
          const copyLeft = +copy.style.left.match(/[\d\.]+/)[0]
+         // @ts-ignore
          const copyTop = +copy.style.top.match(/[\d\.]+/)[0]
 
          copy.style.left = `${copyLeft + e.movementX}px`
