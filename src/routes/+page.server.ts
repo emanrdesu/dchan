@@ -31,6 +31,12 @@ export const actions: Actions = {
       try {
          const uuid = crypto.randomUUID()
          const user = await pb.collection('user').getFirstListItem(query)
+
+         const otherSessions = await pb
+            .collection('session')
+            .getFullList({ filter: `user = "${user.id}"` })
+         for (const s of otherSessions) await pb.collection('session').delete(s.id)
+
          await pb.collection('session').create({
             user: user.id,
             uuid: uuid

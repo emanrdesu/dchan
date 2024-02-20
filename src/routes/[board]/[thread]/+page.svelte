@@ -16,7 +16,7 @@
 
    export let data
 
-   setMenu('gridicons:create')
+   setMenu('gridicons:create', 'bi:star-fill')
 
    const listeners = new Map<Element, object>()
 

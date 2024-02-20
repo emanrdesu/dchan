@@ -7,13 +7,13 @@ export const pb = new PocketBase('http://127.0.0.1:8090')
 
 export const cleanup = {
    async captcha() {
-      const all = await pb.collection('captcha').getFullList<Captcha>()
+      const all = await pb.collection('captcha').getFullList<Captcha>({ batch: 5000 })
       const expired = all.filter((c) => +Date.now() - +new Date(c.created) > 6e4)
       expired.forEach((c) => pb.collection('captcha').delete(c.id))
    },
 
    async session() {
-      const all = await pb.collection('session').getFullList<Session>()
+      const all = await pb.collection('session').getFullList<Session>({ batch: 5000 })
       const expired = all.filter((s) => +Date.now() - +new Date(s.created) > 8.64e7)
       expired.forEach((s) => pb.collection('session').delete(s.id))
    }
