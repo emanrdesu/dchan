@@ -231,7 +231,12 @@
             <img
                style:max-height="150px"
                style:max-width="min(100%, 180px)"
-               class="rounded-sm mb-1"
+               class="blur-md rounded-sm mb-1"
+               style:transition="filter 300ms ease-in"
+               on:load={(e) => {
+                  // @ts-ignore
+                  e.target.classList.remove('blur-md')
+               }}
                src="/media/{op.id}/{op.media}?thumb=250x0"
                alt="op"
             />

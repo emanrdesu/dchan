@@ -1,11 +1,11 @@
 <script lang="ts">
    import { throttle } from 'lodash'
-   import Spinner from './Spinner.svelte'
    import { onMount, tick } from 'svelte'
    import { fade } from 'svelte/transition'
    import { tweened } from 'svelte/motion'
 
    import { createEventDispatcher } from 'svelte'
+   import Icon from '@iconify/svelte'
 
    const dispatch = createEventDispatcher()
 
@@ -60,7 +60,9 @@
    }
 </script>
 
-<div class:w-min={active} class="{add} card bg-base-100 shadow-xl">
+<!-- class:w-min={active}  -->
+
+<div class="{add} card bg-base-100 shadow-xl">
    <div class="p-3 card-body gap-4 flex-row items-center">
       <span
          tabindex={visible ? 0 : -1}
@@ -68,6 +70,7 @@
          on:keydown={(e) => {
             if (e.target) {
                if (e.code == 'Space' || e.code == 'Enter') {
+                  // @ts-ignore
                   e.target.click()
                }
             }
@@ -81,7 +84,11 @@
       <div class="flex items-center gap-2 flex-col">
          {#if active}
             {#await fetchCaptcha()}
-               <Spinner />
+               <div class="flex mr-[2px] items-center justify-center">
+                  {#each new Array(5) as _}
+                     <Icon icon="eos-icons:three-dots-loading" width={33} />
+                  {/each}
+               </div>
             {:then svg}
                <div class="tooltip hover:cursor-help tooltip-right" data-tip="case insensitive">
                   {@html svg}

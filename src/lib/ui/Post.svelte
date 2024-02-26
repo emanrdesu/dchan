@@ -6,6 +6,7 @@
 
    import Icon from '@iconify/svelte'
    import { cubicInOut } from 'svelte/easing'
+   import Image from './part/Image.svelte'
 
    export let post: Post
    export let op = false
@@ -119,19 +120,7 @@
       {#if post.media}
          {@const filename = format.filename(post.media)}
          <div class="float-left mr-3 form-control items-center">
-            <img
-               on:click={onImageClick}
-               on:keydown={() => null}
-               class:max-h-40={!full}
-               class:max-h-[90vh]={full}
-               class:max-w-[160px]={!full}
-               class:max-w-[85vw]={full}
-               style:transition="all 300ms ease-out"
-               class="rounded-sm cursor-pointer"
-               src="{mediaURL}{full ? '' : '?thumb=250x0'}"
-               alt={op ? 'OP' : 'Post'}
-               loading="lazy"
-            />
+            <Image url={mediaURL} />
 
             <small
                title={filename}
