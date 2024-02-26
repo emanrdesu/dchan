@@ -1,16 +1,15 @@
 <script lang="ts">
    import Menu from '$lib/ui/Menu.svelte'
    import { menu, menuClick, menuIcons } from '$lib/stores'
+   import { keyboardClick } from '$lib/misc'
    import Icon from '@iconify/svelte'
    import { fade } from 'svelte/transition'
    import { flip } from 'svelte/animate'
-   import { keyboardClick } from '$lib/misc'
-   import type { LayoutServerData } from './$types'
+   import { page } from '$app/stores'
    import { invalidate } from '$app/navigation'
+   import type { LayoutServerData } from './$types'
 
    export let data: LayoutServerData
-
-   import { page } from '$app/stores'
 
    $: board = data.board
 </script>
@@ -35,13 +34,11 @@
    >
       <span class="flex items-center">
          <span class:translate-y-[2px]={board.icon}>/</span>
-         <span style:color={board.color}
-            >{#if board.icon}<Icon
-                  icon={board.icon}
-                  width="22"
-                  height="22"
-               />{:else}{board.name}{/if}</span
-         ><span class:-translate-y-1={board.icon}>/</span>
+         <span style:color={board.color}>
+            {#if board.icon}
+               <Icon icon={board.icon} width="22" height="22" />{:else}{board.name}{/if}
+         </span>
+         <span class:-translate-y-1={board.icon}>/</span>
       </span>
       - {board.description}
    </a>

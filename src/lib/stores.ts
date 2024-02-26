@@ -1,5 +1,5 @@
 import { noop } from 'lodash'
-import { writable } from 'svelte/store'
+import { writable, type Writable } from 'svelte/store'
 
 export const menu = writable([] as boolean[])
 export const menuIcons = writable([] as string[])
@@ -19,4 +19,31 @@ export function setMenu(list: string[], option = { keep0: false }) {
 
    menuIcons.set(list)
    menuClick.set(new Array(list.length).fill({ on: noop, off: noop }))
+}
+
+export const notifications = writable([] as string[])
+export const notificationColors = writable([] as string[])
+
+function push<X>(x: X, w: Writable<X[]>) {
+   w.update((xs) => {
+      xs.push(x)
+      return xs
+   })
+}
+
+function pop(w: Writable<any[]>) {
+   w.update((xs) => {
+      xs.pop()
+      return xs
+   })
+}
+
+export function notify(message: string, type = 'info', duration = 3000) {
+   push(message, notifications)
+   push(type, notificationColors)
+
+   setTimeout(() => {
+      pop(notifications)
+      pop(notificationColors)
+   }, duration)
 }

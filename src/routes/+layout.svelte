@@ -2,19 +2,30 @@
    import '../app.postcss'
    import { onMount } from 'svelte'
    import { themeChange } from 'theme-change'
-   import { enhance } from '$app/forms'
 
    import Menu from '$lib/ui/Menu.svelte'
-
    import IconText from '$lib/ui/IconText.svelte'
+   import { notifications, notificationColors, notify } from '$lib/stores'
 
    import type { LayoutServerData } from './$types'
    import { goto, invalidate } from '$app/navigation'
    import { fade } from 'svelte/transition'
    import Icon from '@iconify/svelte'
    import { navigating } from '$app/stores'
+   import { superForm } from 'sveltekit-superforms/client'
 
    export let data: LayoutServerData
+
+   const { enhance } = superForm(data.form, {
+      taintedMessage: null,
+      onResult: async ({ result }) => {
+         if (result.type == 'success') {
+            notify(result.data ? `Welcome ${result.data.form.data.username}` : 'Goodbye', 'success')
+         } else {
+            notify('Unable to login', 'info')
+         }
+      }
+   })
 
    onMount(() => {
       themeChange(false)
@@ -124,4 +135,14 @@
       style:animation="progress-loading 500ms infinite ease-in"
       class="top-[98vh] progress fixed"
    />
+{/if}
+
+{#if $notifications.length > 0}
+   <div class="toast">
+      {#each $notifications as notification, i}
+         <div class="alert p-2 text-sm font-bold rounded-md alert-{$notificationColors[i]}">
+            <span>{notification}.</span>
+         </div>
+      {/each}
+   </div>
 {/if}
