@@ -24,10 +24,10 @@
 
    let valid = data.user.valid
 
-   function menuSetup() {
+   function menuSetup(option = { keep0: false }) {
       if (data.user.valid && data.user.starred.length > 0)
-         setMenu('gridicons:create', 'bytesize:eye', 'clarity:settings-line')
-      else setMenu('gridicons:create', 'clarity:settings-line')
+         setMenu(['gridicons:create', 'bytesize:eye', 'clarity:settings-line'], option)
+      else setMenu(['gridicons:create', 'clarity:settings-line'], option)
    }
 
    menuSetup()
@@ -36,10 +36,10 @@
    const checkValidity = (..._) => {
       if (valid != data.user.valid) {
          valid = data.user.valid
-         menuSetup()
+         menuSetup({ keep0: true })
       }
 
-      if (valid && data.user.starred.length == 0) menuSetup()
+      if (valid && data.user.starred.length == 0) menuSetup({ keep0: true })
    }
 
    $: checkValidity(data.user.valid, data.user.starred)

@@ -20,9 +20,9 @@
 
    let valid = data.user.valid
 
-   function menuSetup() {
+   function menuSetup(option = { keep0: false }) {
       if (data.user.valid) {
-         setMenu('gridicons:create', 'mingcute:star-fill')
+         setMenu(['gridicons:create', 'mingcute:star-fill'], option)
          const submitStar = () => {
             const submit = document.querySelector('#star input') as HTMLInputElement
             submit.click()
@@ -36,7 +36,7 @@
                break
             }
          }
-      } else setMenu('gridicons:create')
+      } else setMenu(['gridicons:create'], option)
 
       if (browser) invalidate('/api/user')
    }
@@ -47,7 +47,7 @@
    const checkValidity = (_) => {
       if (valid != data.user.valid) {
          valid = data.user.valid
-         menuSetup()
+         menuSetup({ keep0: true })
       }
    }
 
@@ -311,7 +311,7 @@
          {/if}
 
          {#if input.url}
-            <div class="flex flex-1 gap-1">
+            <div class="flex w-[245px] gap-1">
                <input
                   in:slide|local={{ axis: 'x' }}
                   type="url"
