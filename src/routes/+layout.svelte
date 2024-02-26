@@ -12,6 +12,7 @@
    import { goto, invalidate } from '$app/navigation'
    import { fade } from 'svelte/transition'
    import Icon from '@iconify/svelte'
+   import { navigating } from '$app/stores'
 
    export let data: LayoutServerData
 
@@ -117,3 +118,10 @@
 </div>
 
 <slot />
+
+{#if $navigating}
+   <progress
+      style:animation="progress-loading 500ms infinite ease-in"
+      class="top-[98vh] progress fixed"
+   />
+{/if}

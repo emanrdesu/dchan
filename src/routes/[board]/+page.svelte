@@ -33,14 +33,16 @@
    menuSetup()
 
    // @ts-ignore
-   const checkValidity = (_) => {
+   const checkValidity = (..._) => {
       if (valid != data.user.valid) {
          valid = data.user.valid
          menuSetup()
       }
+
+      if (valid && data.user.starred.length == 0) menuSetup()
    }
 
-   $: checkValidity(data.user.valid)
+   $: checkValidity(data.user.valid, data.user.starred)
 
    const input = {
       name: '',
@@ -231,11 +233,11 @@
             <img
                style:max-height="150px"
                style:max-width="min(100%, 180px)"
-               class="blur-md rounded-sm mb-1"
+               class="blur-sm rounded-sm mb-1"
                style:transition="filter 300ms ease-in"
                on:load={(e) => {
                   // @ts-ignore
-                  e.target.classList.remove('blur-md')
+                  e.target.classList.remove('blur-sm')
                }}
                src="/media/{op.id}/{op.media}?thumb=250x0"
                alt="op"
@@ -269,7 +271,7 @@
 <!-- Thread Creation -->
 <Window
    on:close={() => ($menu[0] = !$menu[0])}
-   add="top-32 w-[329px] right-20"
+   add="top-32 w-[325px] right-20"
    py={34}
    bind:show={$menu[0]}
    bind:message
@@ -525,7 +527,7 @@
    <Window
       title="Thread Watcher"
       on:close={() => ($menu[1] = !$menu[1])}
-      add="top-32 w-[300px] right-20"
+      add="top-32 min-w-[295px] max-w-[310px] right-20"
       hadd="text-sm"
       py={34}
       bind:show={$menu[1]}
@@ -533,9 +535,30 @@
       <nav>
          {#each starredLocal as { board, thread, threadNumber }}
             {@const { title, postCount } = thread}
-            <a class="link link-hover block text-sm link-secondary" href="/{board}/{threadNumber}"
-               >({postCount}) /{board}/{threadNumber} - {title}</a
-            >
+            <div class="flex items-center gap-1">
+               <form
+                  class="hidden"
+                  method="POST"
+                  use:enhance
+                  id="unstar"
+                  action="/{board}/{threadNumber}/?/unstar"
+               >
+                  <input hidden type="submit" />
+               </form>
+               <button
+                  on:click={() => {
+                     const input = document.querySelector('#unstar input')
+                     // @ts-ignore
+                     input.click()
+                  }}
+               >
+                  <Icon class="hover:text-warning hover:cursor-pointer" icon="typcn:delete" />
+               </button>
+               <a
+                  class="link link-hover overflow-hidden whitespace-nowrap text-sm link-secondary"
+                  href="/{board}/{threadNumber}">({postCount}) /{board}/{threadNumber} - {title}</a
+               >
+            </div>
          {/each}
       </nav>
    </Window>

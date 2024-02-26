@@ -35,7 +35,8 @@
    style:transition="all 600ms ease-out, filter 300ms ease-out"
    on:click={onImageClick}
    on:keydown={() => null}
-   class:blur-md={!loaded}
+   class:blur-sm={!loaded}
    class="rounded-sm cursor-pointer"
    alt="Post"
+   loading="lazy"
 />
