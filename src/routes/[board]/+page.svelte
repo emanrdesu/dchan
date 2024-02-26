@@ -271,7 +271,7 @@
 <!-- Thread Creation -->
 <Window
    on:close={() => ($menu[0] = !$menu[0])}
-   add="top-32 w-[305px] right-20"
+   add="top-32 w-[328px] right-20"
    py={34}
    bind:show={$menu[0]}
    bind:message
@@ -293,8 +293,19 @@
             bind:value={input.subject}
             placeholder="Subject"
             class:input-error={input.subject.length > 100}
-            class="input w-3/5 input-xs"
+            class="input flex-1 input-xs"
          />
+
+         {#if data.user.valid}
+            <div transition:fade|local class="ml-auto">
+               <IconToggle
+                  bind:interact={$menu[0]}
+                  icon="icon-park-outline:message-sent"
+                  name="DMs"
+                  tip="allow DMs"
+               />
+            </div>
+         {/if}
       </div>
 
       <textarea
@@ -361,17 +372,6 @@
                         <option value={race}>{race.titleCase()}</option>
                      {/each}
                   </select>
-               </div>
-            {/if}
-
-            {#if data.user.valid}
-               <div transition:fade|local class="ml-auto">
-                  <IconToggle
-                     bind:interact={$menu[0]}
-                     icon="icon-park-outline:message-sent"
-                     name="DMs"
-                     tip="allow DMs"
-                  />
                </div>
             {/if}
          </div>
