@@ -22,7 +22,25 @@
 
    export let data
 
-   setMenu('gridicons:create', 'clarity:settings-line')
+   let valid = data.user.valid
+
+   function menuSetup() {
+      if (data.user.valid && data.user.starred.length > 0)
+         setMenu('gridicons:create', 'bytesize:eye', 'clarity:settings-line')
+      else setMenu('gridicons:create', 'clarity:settings-line')
+   }
+
+   menuSetup()
+
+   // @ts-ignore
+   const checkValidity = (_) => {
+      if (valid != data.user.valid) {
+         valid = data.user.valid
+         menuSetup()
+      }
+   }
+
+   $: checkValidity(data.user.valid)
 
    const input = {
       name: '',
@@ -243,9 +261,10 @@
    {/each}
 </div>
 
+<!-- Thread Creation -->
 <Window
    on:close={() => ($menu[0] = !$menu[0])}
-   add="top-32 right-20"
+   add="top-32 w-[329px] right-20"
    py={34}
    bind:show={$menu[0]}
    bind:message
@@ -494,6 +513,28 @@
       </button>
    </form>
 </Window>
+
+<!-- Thread Watcher -->
+{#if data.user.valid && data.user.starred.length > 0}
+   {@const starredLocal = data.user.starred.filter((s) => s.board == data.slug.board)}
+   <Window
+      title="Thread Watcher"
+      on:close={() => ($menu[1] = !$menu[1])}
+      add="top-32 w-[300px] right-20"
+      hadd="text-sm"
+      py={34}
+      bind:show={$menu[1]}
+   >
+      <nav>
+         {#each starredLocal as { board, thread, threadNumber }}
+            {@const { title, postCount } = thread}
+            <a class="link link-hover block text-sm link-secondary" href="/{board}/{threadNumber}"
+               >({postCount}) /{board}/{threadNumber} - {title}</a
+            >
+         {/each}
+      </nav>
+   </Window>
+{/if}
 
 <style>
    textarea {

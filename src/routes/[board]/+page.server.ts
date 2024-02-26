@@ -9,20 +9,17 @@ import type { Board, Post } from '../../lib/types'
 import type { PageServerLoad } from './$types'
 import validate from '$lib/validate'
 
-export const load: PageServerLoad = async ({ params, parent, fetch, url }) => {
+export const load: PageServerLoad = async ({ params, parent, fetch, depends }) => {
    await parent()
-
-   const query = (param: string) => url.searchParams.has(param)
-   const get = (param: string) => url.searchParams.get(param)
+   depends('board')
 
    let link = `/api/${params.board}?catalog`
+   const form = await superValidate(schema.thread)
 
    let { message, ops } = await fetch(link).then((r) => r.json())
    if (message) throw error(404, 'This board does not exist.')
 
-   const form = await superValidate(schema.thread)
-
-   return { ops: ops as Post[], form }
+   return { slug: { board: params.board }, ops: ops as Post[], form }
 }
 
 export const actions: Actions = {
@@ -125,6 +122,7 @@ export const actions: Actions = {
          const thread = await pb.collection('thread').create({
             board: board.id,
             index: form.data.sticky ? 0 : 1,
+            title: format.title(form.data.subject ? form.data.subject : form.data.comment),
             sticky: form.data.sticky ? true : false,
             closed: form.data.closed ? true : false,
             archived: false,

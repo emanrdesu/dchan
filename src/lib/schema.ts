@@ -36,6 +36,8 @@ const base = {
 }
 
 export default {
+   empty: z.object({}),
+
    login: z.object({ ...base.user }),
 
    registration: z.object({

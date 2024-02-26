@@ -1,6 +1,6 @@
 import { escape } from 'html-escaper'
 import type { gender, race, status } from '$lib/types'
-import { difference, intersection } from 'lodash'
+import { difference, intersection, take } from 'lodash'
 import des3 from 'crypto-js/tripledes'
 import CryptoJS from 'crypto-js'
 
@@ -89,6 +89,10 @@ export const keyboardClick = (e: KeyboardEvent) => {
 }
 
 export const format = {
+   title(t: string) {
+      return take(t.split('\n\r')[0].split(' '), 6).join(' ')
+   },
+
    date(d: string) {
       const date = new Date(d)
       const options = [{ year: '2-digit', month: '2-digit', day: '2-digit' }, { weekday: 'short' }]

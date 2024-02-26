@@ -1,13 +1,16 @@
 <script lang="ts">
    import Menu from '$lib/ui/Menu.svelte'
-   import { menu, icons } from '$lib/stores'
+   import { menu, menuClick, menuIcons } from '$lib/stores'
    import Icon from '@iconify/svelte'
    import { fade } from 'svelte/transition'
    import { flip } from 'svelte/animate'
    import { keyboardClick } from '$lib/misc'
    import type { LayoutServerData } from './$types'
+   import { invalidate } from '$app/navigation'
 
    export let data: LayoutServerData
+
+   import { page } from '$app/stores'
 
    $: board = data.board
 </script>
@@ -25,6 +28,9 @@
    <a
       href="/{board.name}"
       on:keydown={keyboardClick}
+      on:click={() => {
+         if ($page.route.id == '/[board]') invalidate('board')
+      }}
       class="text-neutral-content blout hover:text-secondary flex gap-1 text-xl"
    >
       <span class="flex items-center">
@@ -41,17 +47,24 @@
    </a>
 
    {#if $menu.length > 0}
-      <Menu add="gap-2">
-         {#each $icons as icon, i (i)}
+      {@const size = 30}
+
+      <Menu add="gap-1">
+         {#each $menuIcons as icon, i (i)}
             <button
                animate:flip={{ duration: 300 }}
                in:fade|local={{ duration: 200 }}
                class="outline-none"
-               on:click={() => ($menu[i] = !$menu[i])}
+               on:click={() => {
+                  if ($menu[i]) $menuClick[i].off()
+                  else $menuClick[i].on()
+
+                  $menu[i] = !$menu[i]
+               }}
                tabindex="0"
             >
                <div style:transition="color 200ms ease" class:text-primary={$menu[i]}>
-                  <Icon class="p-1" {icon} width="32" height="32" />
+                  <Icon class="px-1" {icon} width={size} height={size} />
                </div>
             </button>
          {/each}

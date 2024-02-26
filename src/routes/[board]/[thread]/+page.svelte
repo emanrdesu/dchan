@@ -1,7 +1,7 @@
 <script lang="ts">
    import Icon from '@iconify/svelte'
    import { superForm } from 'sveltekit-superforms/client'
-   import { menu, setMenu } from '$lib/stores'
+   import { menu, menuClick, setMenu } from '$lib/stores'
    import { regex, bool, icons, keyboardClick, sign, genders } from '$lib/misc'
 
    import Window from '$lib/ui/Window.svelte'
@@ -13,10 +13,45 @@
    import { fly, slide } from 'svelte/transition'
 
    import { onReplyHover, onReplyLeave, onReplyMove, scrollToID } from '$lib/events'
+   import { invalidate } from '$app/navigation'
+   import { browser } from '$app/environment'
 
    export let data
 
-   setMenu('gridicons:create', 'bi:star-fill')
+   let valid = data.user.valid
+
+   function menuSetup() {
+      if (data.user.valid) {
+         setMenu('gridicons:create', 'mingcute:star-fill')
+         const submitStar = () => {
+            const submit = document.querySelector('#star input') as HTMLInputElement
+            submit.click()
+         }
+
+         $menuClick[1] = { on: submitStar, off: submitStar }
+
+         for (const star of data.user.starred) {
+            if (star.board == data.slug.board && star.threadNumber == +data.slug.thread) {
+               $menu[1] = true
+               break
+            }
+         }
+      } else setMenu('gridicons:create')
+
+      if (browser) invalidate('/api/user')
+   }
+
+   menuSetup()
+
+   // @ts-ignore
+   const checkValidity = (_) => {
+      if (valid != data.user.valid) {
+         valid = data.user.valid
+         menuSetup()
+      }
+   }
+
+   $: checkValidity(data.user.valid)
 
    const listeners = new Map<Element, object>()
 
@@ -46,6 +81,9 @@
 
    onMount(() => {
       addQuoteListeners()
+
+      if (data.user.valid) {
+      }
 
       return () => {
          for (const [q, entry] of listeners)
@@ -132,7 +170,19 @@
    sign.reset()
 </script>
 
-<div out:fly class="ml-3">
+{#if data.user.valid}
+   {#if $menu[1]}
+      <form class="hidden" method="POST" use:enhance id="star" action="?/unstar">
+         <input hidden type="submit" />
+      </form>
+   {:else}
+      <form class="hidden" method="POST" use:enhance id="star" action="?/star">
+         <input hidden type="submit" />
+      </form>
+   {/if}
+{/if}
+
+<div out:fly class="ml-3 mb-10">
    <Post post={data.posts[0]} thread={data.thread} board={data.board} op opno={data.posts[0].no} />
 
    <div class="ml-3 mt-2 form-control gap-2">
@@ -144,13 +194,13 @@
 
 <Window
    on:close={() => ($menu[0] = !$menu[0])}
-   add="top-32 right-20"
+   add="top-32 w-[330px] right-20"
    py={34}
    bind:show={$menu[0]}
    bind:message
    title="New Post"
 >
-   <form method="POST" use:enhance class="form-control gap-2">
+   <form action="?/post" method="POST" use:enhance class="form-control gap-2">
       <div class="flex gap-2">
          <input
             tabindex={$menu[0] ? 0 : -1}

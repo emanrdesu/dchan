@@ -147,7 +147,7 @@
          <Header {post} />
       {/if}
 
-      <span style:font-size="13px" style:line-height="14px" class="comment">
+      <span style:font-size="13px" style:line-height="15px" class="comment">
          {@html format.comment(post.comment, opno)}
       </span>
    </div>

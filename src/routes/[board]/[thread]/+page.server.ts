@@ -7,7 +7,8 @@ import validate from '$lib/validate'
 
 import type { Actions } from './$types'
 import type { PageServerLoad } from './$types'
-import type { Board, Post, Thread, User } from '$lib/types'
+import type { Board, Post, Starred, Thread, User } from '$lib/types'
+import { findIndex } from 'lodash'
 
 export const load: PageServerLoad = async ({ params, fetch }) => {
    const form = await superValidate(schema.post)
@@ -18,11 +19,59 @@ export const load: PageServerLoad = async ({ params, fetch }) => {
    if (message) throw error(404, 'This thread does not exist')
    const board = (await fetch(`/api/${params.board}`).then((r) => r.json())) as Board
 
-   return { form, board, thread: thread as Thread, posts: posts as Post[] }
+   return {
+      slug: { board: params.board, thread: params.thread },
+      form,
+      board,
+      thread: thread as Thread,
+      posts: posts as Post[]
+   }
 }
 
 export const actions: Actions = {
-   default: async ({ request, params, fetch }) => {
+   star: async ({ request, params, fetch }) => {
+      const form = await superValidate(await request.formData(), schema.empty)
+      const user: User = await fetch('/api/user')
+         .then((res) => res.json())
+         .catch(() => ({ valid: false }))
+
+      if (!user.valid) return fail(400, { form })
+
+      // prettier-ignore
+      if (findIndex(user.starred, (s) => s.board == params.board && s.threadNumber == +params.thread) >= 0)
+         return fail(409, { form })
+
+      const threadID = await fetch(`/api/${params.board}/${params.thread}?id`).then((r) => r.json())
+
+      await pb.collection('starred').create({
+         user: user.id,
+         board: params.board,
+         thread: threadID,
+         threadNumber: params.thread
+      })
+
+      return { form }
+   },
+
+   unstar: async ({ request, params, fetch }) => {
+      const form = await superValidate(await request.formData(), schema.empty)
+      const user: User = await fetch('/api/user')
+         .then((res) => res.json())
+         .catch(() => ({ valid: false }))
+
+      if (!user.valid) return fail(400, { form })
+
+      try {
+         const filter = `user = "${user.id}" && board = "${params.board}" && threadNumber = "${params.thread}"`
+         const star = await pb.collection('starred').getFirstListItem(filter)
+         await pb.collection('starred').delete(star.id)
+         return { form }
+      } catch {
+         return fail(400, { form })
+      }
+   },
+
+   post: async ({ request, params, fetch }) => {
       const formData = await request.formData()
 
       // delete duplicate newlines
@@ -90,14 +139,15 @@ export const actions: Actions = {
             console.log(thread.races.includes(user.race))
 
             if (user.valid) {
-               if (!['mod', 'founder'].includes(user.role) && user.verified) {
+               if (user.verified) {
                   if (!thread.genders.includes(user.gender))
                      return err('gender', `${user.gender.titleCase()}s not allowed`)
 
                   if (!thread.races.includes(user.race))
                      return err('race', `${user.race.titleCase()} people not allowed`)
                } else {
-                  return err('name', 'Must be verified to post')
+                  if (!['mod', 'founder'].includes(user.role))
+                     return err('name', 'Must be verified to post')
                }
             } else {
                return err('name', 'Must be logged in to post')

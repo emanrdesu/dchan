@@ -6,6 +6,24 @@ export type role = 'user' | 'mod' | 'janitor' | 'founder'
 export type status = 'sticky' | 'closed'
 export type avatarStyle = 'lorelei' | 'notionists' | 'micah' | 'open-peeps' | 'croodles'
 
+const base = ['id', 'created', 'updated']
+export const fields = {
+   thread: [
+      ...base,
+      'board',
+      'index',
+      'title',
+      'sticky',
+      'closed',
+      'archived',
+      'genders',
+      'races',
+      'verified',
+      'postCount',
+      'imageCount'
+   ]
+}
+
 export interface Captcha extends Record {
    text: string
 }
@@ -13,10 +31,6 @@ export interface Captcha extends Record {
 export interface Session extends Record {
    user: string | User
    uuid: string
-}
-
-export interface Category extends Record {
-   name: string
 }
 
 export interface Board extends Record {
@@ -37,6 +51,7 @@ export interface Board extends Record {
 export interface Thread extends Record {
    board: string
    index: number
+   title: string
    sticky: boolean
    closed: boolean
    archived: boolean
@@ -66,6 +81,8 @@ export interface Post extends Record {
 
 export interface User extends Record {
    valid: boolean
+   starred: Starred[]
+
    username: string
    password: string
    role: role
@@ -78,4 +95,11 @@ export interface User extends Record {
 
 export interface Category extends Record {
    name: string
+}
+
+export interface Starred extends Record {
+   user: string
+   board: string
+   thread: Thread
+   threadNumber: number
 }

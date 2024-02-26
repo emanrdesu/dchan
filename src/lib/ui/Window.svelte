@@ -66,7 +66,6 @@
    class:pointer-events-none={!show}
    bind:this={window}
    style:transition="opacity 300ms ease-in-out"
-   style:width="350px"
    class="{add} p-3 fixed z-10 bg-base-300 rounded-lg shadow-md w-fit"
 >
    <div class="flex items-center gap-3 mb-3">

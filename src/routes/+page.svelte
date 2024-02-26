@@ -3,7 +3,6 @@
    import type { PageServerData } from './$types'
    import { fly } from 'svelte/transition'
    import Icon from '@iconify/svelte'
-   import type { Category } from '$lib/types'
 
    export let data: PageServerData
 
@@ -12,7 +11,6 @@
    })
 
    const boards = data.boards
-   boards.forEach((b) => (b.category = (b.expand.category as Category).name))
    const categories = Array.from(new Set(boards.map((b) => b.category))) as string[]
 </script>
 

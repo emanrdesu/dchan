@@ -9,14 +9,10 @@ import type { Board } from '$lib/types'
 
 export const load: PageServerLoad = async ({ parent, request }) => {
    const { user } = await parent()
-
    const form = await superValidate(request, schema.login, { id: 'loginForm' })
+   const boards = await pb.collection('board').getFullList<Board>({ sort: 'name' })
 
-   const boards = await pb
-      .collection('board')
-      .getFullList<Board>({ sort: 'name', expand: 'category' })
-
-   return { user, form, boards: minify(boards, ['expand']) as Board[] }
+   return { user, form, boards: minify(boards) as Board[] }
 }
 
 export const actions: Actions = {
@@ -35,7 +31,10 @@ export const actions: Actions = {
          const otherSessions = await pb
             .collection('session')
             .getFullList({ filter: `user = "${user.id}"` })
-         for (const s of otherSessions) await pb.collection('session').delete(s.id)
+
+         for (const s of otherSessions) {
+            pb.collection('session').delete(s.id)
+         }
 
          await pb.collection('session').create({
             user: user.id,
