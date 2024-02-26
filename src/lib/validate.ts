@@ -39,68 +39,14 @@ export default {
       return this.ok()
    },
 
-   async url(link: string) {
-      const url = {
-         fail: false,
-         meta: undefined as unknown as Request
-      }
-
-      url.meta = await fetch(link, { method: 'HEAD' })
-         .then((r) => r)
-         .catch((r) => {
-            url.fail = true
-            return r
-         })
-
-      if (url.fail) return this.err('Failed to fetch URL')
-
-      const content = {
-         type: url.meta.headers.get('content-type'),
-         length: url.meta.headers.get('content-length')
-      }
-
-      if (content.type) {
-         if (!content.type.match(regex.media)) {
-            return this.err('URL not an image')
-         }
-      } else {
-         return this.err('Missing type header')
-      }
-
-      if (content.length) {
-         if (+content.length > 4194304) {
-            return this.err('Resource too big')
-         }
-      } else {
-         return this.err('Missing length header')
-      }
-
-      return this.ok()
-   },
-
-   async filexURL(file: File | null, url: string | undefined, filename: string, mode = 'thread') {
+   async file(file: File | null, mode = 'thread') {
       if (file && file instanceof File && file.size > 0) {
          if (file.size > 4194304) return this.err('File too big', 'file')
          if (!file.type.match(regex.media)) return this.err('Invalid file type', 'file')
          if (file.name.length > 200) return this.err('Filename too big', 'file')
-      } else if (url) {
-         const { valid, message } = await this.url(url)
-
-         if (!valid) return this.err(message, 'url')
-
-         let fail = false
-         file = await fetch(url)
-            .then((r) => r.blob())
-            .then((blob) => new File([blob], filename, { type: blob.type }))
-            .catch(() => {
-               fail = true
-               return new File([], '')
-            })
-
-         if (fail) return this.err('Failed to fetch URL', 'url')
       } else {
          if (mode == 'post') return this.ok({ zile: null })
-         else return this.err('No file/URL given', 'url')
+         else return this.err('No file given', 'file')
       }
 
       return this.ok({ zile: file })

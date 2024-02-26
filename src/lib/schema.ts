@@ -29,7 +29,6 @@ const base = {
       race: z.string().regex(rxa(rx.races, /^none$/), 'Race invalid.'),
       DMs: z.boolean().optional(),
       file: z.any().optional(),
-      url: z.string().url().optional(),
       filename: z.string().max(200, 'Filename too big.').optional(),
       captcha: z.string().length(6).optional()
    }

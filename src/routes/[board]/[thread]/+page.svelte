@@ -103,10 +103,7 @@
       race: 'none',
       captcha: '',
       sage: false,
-      file: undefined as unknown as HTMLInputElement,
-      url: false,
-      link: '',
-      filename: ''
+      file: undefined as unknown as HTMLInputElement
    }
 
    let fileGiven = false
@@ -115,11 +112,8 @@
    $: canSubmit =
       (!fileGiven || (fileGiven && fileOk)) &&
       input.name.length <= 50 &&
-      (fileGiven ||
-         (input.url && input.link.trim().length > 0) ||
-         input.comment.trim().length > 0) &&
+      (fileGiven || input.comment.trim().length > 0) &&
       input.comment.length <= 2000 &&
-      (!input.url || input.filename.length <= 200) &&
       ((data.user.valid && ['mod', 'founder'].includes(data.user.role)) ||
          input.captcha.length == 6)
 
@@ -136,7 +130,9 @@
             $menu[0] = false
             input.comment = ''
             input.name = ''
-            if (input.file) input.file.value = ''
+            input.captcha = ''
+            input.file.value = ''
+            fileGiven = false
          } else {
             // @ts-ignore
             showMessage(getError(result.data.form.errors), 'error')
@@ -298,58 +294,15 @@
       {/if}
 
       <div class="flex gap-1 justify-stretch items-center">
-         {#if !input.url}
-            <input
-               in:slide|local={{ axis: 'x', delay: 0 }}
-               tabindex={$menu[0] ? 0 : -1}
-               type="file"
-               name="file"
-               bind:this={input.file}
-               on:change={onFileChange}
-               class="input input-xs bg-transparent px-0"
-            />
-         {/if}
-
-         {#if input.url}
-            <div class="flex w-[245px] gap-1">
-               <input
-                  in:slide|local={{ axis: 'x' }}
-                  type="url"
-                  tabindex={$menu[0] ? 0 : -1}
-                  name="url"
-                  placeholder="Link"
-                  bind:value={input.link}
-                  class="input input-xs w-1/2"
-               />
-
-               <input
-                  in:slide|local={{ axis: 'x' }}
-                  type="text"
-                  tabindex={$menu[0] ? 0 : -1}
-                  name="filename"
-                  bind:value={input.filename}
-                  placeholder="Filename"
-                  class:input-error={input.filename.length > 100}
-                  class="input input-xs w-1/2"
-               />
-            </div>
-         {/if}
-
-         <label class="ml-auto flex-grow-0 swap">
-            <input
-               on:click={() => {
-                  input.url = !input.url
-                  fileGiven = false
-               }}
-               type="checkbox"
-            />
-            <div class="swap-on">
-               <Icon icon="mdi:file" width={22} height={22} />
-            </div>
-            <div class="swap-off">
-               <Icon class="text-secondary" icon="pajamas:link" width={22} height={22} />
-            </div>
-         </label>
+         <input
+            in:slide|local={{ axis: 'x', delay: 0 }}
+            tabindex={$menu[0] ? 0 : -1}
+            type="file"
+            name="file"
+            bind:this={input.file}
+            on:change={onFileChange}
+            class="input input-xs bg-transparent px-0"
+         />
       </div>
 
       {#if $menu[0] && !(data.user.valid && ['founder', 'mod'].includes(data.user.role))}

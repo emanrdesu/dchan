@@ -2,7 +2,7 @@ import schema from '$lib/schema'
 import { pb, Boarb } from '$lib/pocketbase'
 import { intersection } from 'lodash'
 import { error, fail } from '@sveltejs/kit'
-import { random, deleteReturn, format, calculateMD5 } from '$lib/misc'
+import { deleteReturn, format, calculateMD5 } from '$lib/misc'
 import { setError, superValidate } from 'sveltekit-superforms/server'
 import type { Actions } from './$types'
 import type { Board, Post } from '../../lib/types'
@@ -32,7 +32,7 @@ export const actions: Actions = {
       const form = await superValidate(formData, schema.thread)
 
       let board: Board, boarb
-      let user, genders, races, file: File | null, hash: string | null, filename: string
+      let user, genders, races, file: File | null, hash: string | null
       hash = null
 
       const err = (field: any, message: string, status = 400) => {
@@ -57,8 +57,6 @@ export const actions: Actions = {
 
          races = form.data.require ? intersection(form.data.require, board.races) : board.races
          if (races.length == 0) races = board.races
-
-         filename = form.data.filename || random.filename()
       }
 
       /* VALIDATION */
@@ -78,15 +76,10 @@ export const actions: Actions = {
             if (!valid) return err('captcha', message)
          }
 
-         // file & URL
+         // file
          {
             file = formData.get('file') as File | null
-            const { valid, message, field, zile } = await validate.filexURL(
-               file,
-               form.data.url,
-               filename
-            )
-
+            const { valid, message, field, zile } = await validate.file(file)
             if (valid) file = zile
             else return err(field, message)
 
@@ -166,7 +159,7 @@ export const actions: Actions = {
             await pb.collection('thread').delete(thread.id)
             await boarb.updateCount(-1)
             await boarb.catalog.shift(-1)
-            return err('file', 'Invalid file/URL')
+            return err('file', 'Invalid file')
          }
 
          await boarb.catalog.archive()

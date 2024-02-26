@@ -1,13 +1,13 @@
 import schema from '$lib/schema'
 import { pb, Boarb, Bread } from '$lib/pocketbase'
 import { error, fail } from '@sveltejs/kit'
-import { deleteReturn, random, format, calculateMD5 } from '$lib/misc'
+import { deleteReturn, format, calculateMD5 } from '$lib/misc'
 import { setError, superValidate } from 'sveltekit-superforms/server'
 import validate from '$lib/validate'
 
 import type { Actions } from './$types'
 import type { PageServerLoad } from './$types'
-import type { Board, Post, Starred, Thread, User } from '$lib/types'
+import type { Board, Post, Thread, User } from '$lib/types'
 import { findIndex } from 'lodash'
 
 export const load: PageServerLoad = async ({ params, fetch }) => {
@@ -80,11 +80,8 @@ export const actions: Actions = {
       const form = await superValidate(formData, schema.post)
 
       let board: Board, boarb, thread: Thread, bread
-      let user: User,
-         quotes: number[] | undefined,
-         file: File | null,
-         hash: string | null,
-         filename: string
+      let user: User, quotes: number[] | undefined, file: File | null, hash: string | null
+
       hash = null
 
       const err = (field: any, message: string, status = 400) => {
@@ -107,8 +104,6 @@ export const actions: Actions = {
          user = await fetch('/api/user')
             .then((res) => res.json())
             .catch(() => ({ valid: false }))
-
-         filename = form.data.filename || random.filename()
       }
 
       /* VALIDATION */
@@ -169,16 +164,11 @@ export const actions: Actions = {
             if (!valid) return err('captcha', message)
          }
 
-         // file & URL
+         // file
          {
             file = formData.get('file') as File | null
 
-            const { valid, message, field, zile } = await validate.filexURL(
-               file,
-               form.data.url,
-               filename,
-               'post'
-            )
+            const { valid, message, field, zile } = await validate.file(file, 'post')
 
             if (valid) file = zile
             else return err(field, message)
@@ -194,6 +184,9 @@ export const actions: Actions = {
                } catch {
                   return err('file', 'Error calculating MD5 hash')
                }
+            } else {
+               if (form.data.comment.trim().length == 0)
+                  return err('comment', "Post can't be empty")
             }
          }
       }
