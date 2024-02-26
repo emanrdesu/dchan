@@ -62,7 +62,7 @@
 
 <!-- class:w-min={active}  -->
 
-<div class="{add} card bg-base-100 shadow-xl">
+<div class="{add} w-[273px] card bg-base-100 shadow-xl">
    <div class="p-3 card-body gap-4 flex-row items-center">
       <span
          tabindex={visible ? 0 : -1}
@@ -102,7 +102,7 @@
                   tabindex={visible ? 0 : -1}
                   class:input-disabled={$timer == 0}
                   class:input-error={value.length > 0 && value.length != 6}
-                  class="input input-bordered input-xs w-full text-center"
+                  class="input input-xs w-10/12 input-bordered text-center"
                />
             {:catch error}
                {@html error}

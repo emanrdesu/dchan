@@ -271,7 +271,7 @@
 <!-- Thread Creation -->
 <Window
    on:close={() => ($menu[0] = !$menu[0])}
-   add="top-32 w-[325px] right-20"
+   add="top-32 w-[305px] right-20"
    py={34}
    bind:show={$menu[0]}
    bind:message
