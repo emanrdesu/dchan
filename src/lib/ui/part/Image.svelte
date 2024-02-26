@@ -1,12 +1,13 @@
 <script lang="ts">
-   import { onMount } from 'svelte'
+   import { createEventDispatcher, onMount } from 'svelte'
 
    export let url: string
-
    let full = false
 
    let image: HTMLImageElement
    let loaded = false
+
+   const dispatch = createEventDispatcher()
 
    async function onImageClick(e: MouseEvent) {
       if (e.ctrlKey) {
@@ -14,6 +15,8 @@
       } else {
          loaded = false
          full = !full
+
+         dispatch('delta', { value: full })
       }
    }
 
@@ -28,7 +31,7 @@
 <img
    src="{url}{full ? '' : '?thumb=250x0'}"
    bind:this={image}
-   class:max-w-[85vw]={full}
+   class:max-w-[75vw]={full}
    class:max-h-[90vh]={full}
    class:max-h-40={!full}
    class:max-w-[160px]={!full}

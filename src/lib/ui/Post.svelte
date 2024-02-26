@@ -15,15 +15,7 @@
    export let board = undefined as unknown as Board
 
    const mediaURL = `/media/${post.id}/${post.media}`
-   let full = false
-
-   async function onImageClick(e: MouseEvent) {
-      if (e.ctrlKey) {
-         window.open(mediaURL, '_blank')
-      } else {
-         full = !full
-      }
-   }
+   let imageFull = false
 
    function randomLength(base: number, add: number) {
       return sign.flip() * (base + Math.floor(Math.random() * add))
@@ -116,11 +108,15 @@
       <Header add="mb-2" {post} />
    {/if}
 
+   {#if op && imageFull}
+      <Header {post} />
+   {/if}
+
    <div class="overflow-auto leading-4">
       {#if post.media}
          {@const filename = format.filename(post.media)}
          <div class="float-left mr-3 form-control items-center">
-            <Image url={mediaURL} />
+            <Image on:delta={(e) => (imageFull = e.detail.value)} url={mediaURL} />
 
             <small
                title={filename}
@@ -132,7 +128,7 @@
          </div>
       {/if}
 
-      {#if op}
+      {#if op && !imageFull}
          <Header {post} />
       {/if}
 
