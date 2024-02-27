@@ -5,7 +5,8 @@
 
    import Menu from '$lib/ui/Menu.svelte'
    import IconText from '$lib/ui/IconText.svelte'
-   import { notifications, notificationColors, notify } from '$lib/stores'
+   import { notifications, notify } from '$lib/stores'
+   import { random } from '$lib/misc'
 
    import type { LayoutServerData } from './$types'
    import { goto, invalidate } from '$app/navigation'
@@ -20,9 +21,9 @@
       taintedMessage: null,
       onResult: async ({ result }) => {
          if (result.type == 'success') {
-            notify(result.data ? `Welcome ${result.data.form.data.username}` : 'Goodbye', 'success')
+            notify(result.data ? random.welcome() : random.goodbye())
          } else {
-            notify('Unable to login', 'info')
+            notify('Try again.')
          }
       }
    })
@@ -140,8 +141,8 @@
 {#if $notifications.length > 0}
    <div class="toast">
       {#each $notifications as notification, i}
-         <div class="alert p-2 text-sm font-bold rounded-md alert-{$notificationColors[i]}">
-            <span>{notification}.</span>
+         <div style:box-shadow="0 0 10px 0 rgba(0,0,0,.2)" class="alert bg-neutral p-2 rounded-md">
+            <span class="text-sm font-bold">{notification}</span>
          </div>
       {/each}
    </div>

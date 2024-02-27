@@ -37,6 +37,7 @@ declare global {
 declare global {
    interface Array<T> {
       promise: (x: T) => Promise<any[]>
+      randelt: () => T
    }
 }
 
@@ -46,6 +47,10 @@ String.prototype.titleCase = function () {
 
 Array.prototype.promise = function (f) {
    return Promise.all(this.map(f))
+}
+
+Array.prototype.randelt = function () {
+   return this[Math.floor(Math.random() * this.length)]
 }
 
 export function show(o: any) {
@@ -188,13 +193,56 @@ export const regex = {
    media: /^(image\/(png|jpeg|jpg|gif))$/
 }
 
+const choices = {
+   contempt: ['🤦🏿', '😒', '🙄', '😐'],
+   hi: [
+      "Oh no, it's you again",
+      'Not you again',
+      'Back for more?',
+      "Don't shitpost too hard",
+      "Don't be racist today",
+      "Don't be sexist today",
+      'Why do you keep coming back?',
+      'Please go away sometime',
+      "It's actually free to stop coming here",
+      'One chance at life and you spend it here',
+      'Why even login? You only lurk'
+   ],
+
+   bye: [
+      'Yes get out!!',
+      'Good riddance.',
+      "Don't come back today.",
+      'Decided to finally touch grass?',
+      'Finally, no more of you.',
+      'Also, try deleting your account.',
+      'Go do your homework nigga.',
+      'Go do your laundry, swine.',
+      "I'm too good for you anyways.",
+      'If you could also not come back, ever.'
+   ]
+}
+
 export const random = {
+   desire(n = 0.5) {
+      return Math.random() < n
+   },
+
    filename(n = 20) {
       let result = ''
       for (let i = 0; i < n; i++) {
          result += Math.floor(Math.random() * 10)
       }
       return result
+   },
+
+   welcome() {
+      const suffix = this.desire(0.2) ? ` ${choices.contempt.randelt()}` : '.'
+      return (choices.hi.randelt() + suffix).replace(/\?\./, '?')
+   },
+
+   goodbye() {
+      return choices.bye.randelt()
    }
 }
 
