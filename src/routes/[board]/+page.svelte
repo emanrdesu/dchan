@@ -3,11 +3,14 @@
    import Window from '$lib/ui/Window.svelte'
    import Captcha from '$lib/ui/Captcha.svelte'
    import IconToggle from '$lib/ui/IconToggle.svelte'
+   import OpImage from '$lib/ui/part/OpImage.svelte'
+   import { menu, setMenu } from '$lib/stores'
+
    import { fade, slide } from 'svelte/transition'
    import { flip } from 'svelte/animate'
    import { tick } from 'svelte'
+
    import { superForm } from 'sveltekit-superforms/client'
-   import { menu, setMenu } from '$lib/stores'
    import {
       bool,
       format,
@@ -226,18 +229,7 @@
             class="flex outline-neutral justify-center"
             href="/{data.board.name}/{op.no}"
          >
-            <img
-               style:max-height="150px"
-               style:max-width="min(100%, 180px)"
-               class="blur-sm rounded-sm mb-1"
-               style:transition="filter 300ms ease-in"
-               on:load={(e) => {
-                  // @ts-ignore
-                  e.target.classList.remove('blur-sm')
-               }}
-               src="/media/{op.id}/{op.media}?thumb=250x0"
-               alt="op"
-            />
+            <OpImage {op} />
          </a>
 
          <small

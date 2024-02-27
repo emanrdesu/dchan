@@ -21,6 +21,7 @@
    }
 
    onMount(() => {
+      if (image.complete) loaded = true
       image.onload = () => (loaded = true)
       return () => {
          image.onload = null
