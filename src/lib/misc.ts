@@ -179,7 +179,7 @@ const choices = {
       'Please go away sometime',
       "It's actually free to stop coming here",
       'One chance at life and you spend it here',
-      'Why even login? You only lurk'
+      'Why are you back?'
    ],
 
    bye: [

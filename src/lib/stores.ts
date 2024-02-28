@@ -5,14 +5,19 @@ export const menuActive = writable([] as boolean[])
 export const menuIcons = writable([] as string[])
 export const menuClick = writable([] as { on: Function; off: Function }[])
 
-export function setMenu(list: string[], option: { keep: number } | null) {
-   let omenun: boolean // ugly hack
-   menuActive.subscribe((m) => (omenun = m[option ? option.keep : 0]))()
+export function setMenu(list: string[], option: { keep: number[] } | null) {
+   let oldMenu: boolean[]
+   menuActive.subscribe((m) => (oldMenu = m))()
    menuActive.set(new Array(list.length).fill(false))
 
    if (option)
       menuActive.update((m) => {
-         m[option.keep] = omenun
+         for (let i = 0; i < m.length; i++) {
+            if (option.keep.includes(i)) {
+               m[i] = oldMenu[i]
+            }
+         }
+
          return m
       })
 
@@ -36,7 +41,7 @@ function pop(w: Writable<any[]>) {
    })
 }
 
-export function notify(message: string, duration = 3000) {
+export function notify(message: string, duration = 4000) {
    push(message, notifications)
 
    setTimeout(() => {

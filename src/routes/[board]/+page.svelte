@@ -35,7 +35,7 @@
 
    $: starredLocal = data.user.valid ? getLocalStars() : []
 
-   function menuSetup(option: { keep: number } | null = null) {
+   function menuSetup(option: { keep: number[] } | null = null) {
       if (data.user.valid && getLocalStars().length > 0)
          setMenu(['gridicons:create', 'bytesize:eye', 'clarity:settings-line'], option)
       else setMenu(['gridicons:create', 'clarity:settings-line'], option)
@@ -47,11 +47,11 @@
    const checkValidity = (..._) => {
       if (userValid != data.user.valid) {
          userValid = data.user.valid
-         menuSetup({ keep: 0 })
+         menuSetup({ keep: [0] })
       }
 
       if (userValid && data.user.starred.length == 0) {
-         menuSetup({ keep: 0 })
+         menuSetup({ keep: [0] })
       }
    }
 
@@ -95,6 +95,7 @@
             input.subject = ''
             if (input.file) input.file.value = ''
          } else {
+            console.log('foo')
             // @ts-ignore
             const message = Object.entries(result.data.form.errors)[0][1] as string
             showWindowMessage(message, 'error')
@@ -102,7 +103,7 @@
 
          if (data.user.valid) {
             await invalidate('/api/user')
-            menuSetup({ keep: 1 })
+            menuSetup({ keep: [0, 1] })
          }
 
          $workLoad--
@@ -133,7 +134,7 @@
 <div
    on:click={() => (expandHover = !expandHover)}
    on:keydown={() => null}
-   class="grid gap-2 ml-2 auto-rows-[250px] min-[490px]:auto-rows-[300px] grid-cols-2 min-[490px]:grid-cols-3 sm:grid-cols-4 min-[867px]:grid-cols-5 lg:grid-cols-6"
+   class="grid gap-2 mb-10 ml-2 auto-rows-[250px] min-[490px]:auto-rows-[300px] grid-cols-2 min-[490px]:grid-cols-3 sm:grid-cols-4 min-[867px]:grid-cols-5 lg:grid-cols-6"
 >
    {#each data.ops as op (op.id)}
       {@const onHover =
