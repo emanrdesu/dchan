@@ -1,13 +1,14 @@
 <script lang="ts">
    import '../app.postcss'
+   import {} from '$lib/stdplus'
    import { onMount } from 'svelte'
    import { themeChange } from 'theme-change'
 
    import Menu from '$lib/ui/Menu.svelte'
    import IconText from '$lib/ui/IconText.svelte'
-   import { busy, notifications, notify, work } from '$lib/stores'
+   import { notifications, notify, workLoad } from '$lib/stores'
    import { random } from '$lib/misc'
-   import {} from '$lib/stdplus'
+   import Busy from '$lib/ui/part/Busy.svelte'
 
    import type { LayoutServerData } from './$types'
    import { afterNavigate, goto, invalidate } from '$app/navigation'
@@ -27,7 +28,7 @@
             notify('Try again.')
          }
 
-         busy.free()
+         $workLoad--
       }
    })
 
@@ -36,10 +37,8 @@
    })
 
    afterNavigate(() => {
-      $work = []
+      $workLoad = 0
    })
-
-   $: busyTime = $work.length > 0
 </script>
 
 <div class="navbar sticky top-0 px-0 py-[2px] z-20 justify-center bg-base-300 min-h-8">
@@ -59,35 +58,41 @@
    </div>
 
    <div class="navbar-center mx-auto">
-      {#if busyTime}
-         <Icon icon="eos-icons:three-dots-loading" width={26} />
-      {/if}
-
-      <button class="btn blout btn-ghost text-lg btn-sm px-1" on:click={() => goto('/')}>
-         <IconText text="dchan">
-            <Icon icon="ion:home" width={16} />
-         </IconText>
-      </button>
-
-      {#if busyTime}
-         <Icon icon="eos-icons:three-dots-loading" width={26} />
-      {/if}
+      <Busy>
+         <button class="btn blout btn-ghost text-lg btn-sm px-1" on:click={() => goto('/')}>
+            <IconText text="dchan">
+               <Icon icon="ion:home" width={16} />
+            </IconText>
+         </button>
+      </Busy>
    </div>
 
    <div class="end flex gap-3 mr-2">
       {#if data.user.valid}
          {@const user = data.user}
+
+         <div class="tooltip -mr-2 tooltip-bottom" data-tip="Your points">
+            {#key user.points}
+               <small
+                  in:fade={{ delay: 200, duration: 200 }}
+                  class="badge badge-sm px-[3px] badge-secondary font-bold"
+               >
+                  {user.points}
+               </small>
+            {/key}
+         </div>
+
          <div in:fade={{ duration: 500 }} class="dropdown dropdown-bottom dropdown-end">
-            <div
+            <button
                tabindex="0"
-               style:transition="all 200ms ease"
-               class="w-8 active:p-[2px] outline-none flex justify-center rounded-md hover:cursor-pointer"
+               style:transition="padding 200ms ease"
+               class="w-8 active:p-[2px] outline-none btn-ghost flex justify-center rounded-md hover:cursor-pointer"
             >
                <img
                   src="https://api.dicebear.com/6.x/{user.avatarStyle}/svg?scale=120&seed={user.avatarSeed}"
                   alt="avatar"
                />
-            </div>
+            </button>
             <form tabindex="-1" method="POST" use:enhance action="/?/logout">
                <Menu vertical add="dropdown-content rounded-md shadow-lg bg-base-300 translate-y-1">
                   <a href="/settings" tabindex="0">
@@ -95,7 +100,7 @@
                         <Icon icon="ant-design:setting-filled" />
                      </IconText>
                   </a>
-                  <button on:click={busy.now} tabindex="0" type="submit">
+                  <button on:click={() => $workLoad++} tabindex="0" type="submit">
                      <span class="font-bold">logout</span>
                   </button>
                </Menu>
@@ -132,7 +137,7 @@
 
                   <button
                      type="submit"
-                     on:click={busy.now}
+                     on:click={() => $workLoad++}
                      on:submit={() => invalidate('/api/user')}
                      class="btn btn-secondary btn-xs mt-2">Submit</button
                   >

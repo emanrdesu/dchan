@@ -1,5 +1,5 @@
 <script lang="ts">
-   import { busy } from '$lib/stores'
+   import { workLoad } from '$lib/stores'
    import { createEventDispatcher, onMount } from 'svelte'
 
    export let url: string
@@ -15,7 +15,7 @@
          window.open(url, '_blank')
       } else {
          loaded = false
-         busy.now()
+         $workLoad++
          full = !full
 
          dispatch('delta', { value: full })
@@ -24,7 +24,7 @@
 
    const complete = () => {
       loaded = true
-      busy.free()
+      if (--$workLoad < 0) $workLoad = 0
    }
 
    onMount(() => {

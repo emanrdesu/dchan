@@ -88,13 +88,10 @@ export interface User extends Record {
    role: role
    gender: gender
    race: race
+   points: number
    verified: boolean
    avatarStyle: avatarStyle
    avatarSeed: string
-}
-
-export interface Category extends Record {
-   name: string
 }
 
 export interface Starred extends Record {

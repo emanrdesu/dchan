@@ -4,7 +4,7 @@
    import Captcha from '$lib/ui/Captcha.svelte'
    import IconToggle from '$lib/ui/IconToggle.svelte'
    import OpImage from '$lib/ui/part/OpImage.svelte'
-   import { busy, menu, setMenu } from '$lib/stores'
+   import { workLoad, menuActive, setMenu } from '$lib/stores'
 
    import { fade, slide } from 'svelte/transition'
    import { flip } from 'svelte/animate'
@@ -26,7 +26,7 @@
 
    export let data
 
-   let valid = data.user.valid
+   let userValid = data.user.valid
 
    function menuSetup(option = { keep0: false }) {
       if (data.user.valid && data.user.starred.length > 0)
@@ -38,12 +38,14 @@
 
    // @ts-ignore
    const checkValidity = (..._) => {
-      if (valid != data.user.valid) {
-         valid = data.user.valid
+      if (userValid != data.user.valid) {
+         userValid = data.user.valid
          menuSetup({ keep0: true })
       }
 
-      if (valid && data.user.starred.length == 0) menuSetup({ keep0: true })
+      if (userValid && data.user.starred.length == 0) {
+         menuSetup({ keep0: true })
+      }
    }
 
    $: checkValidity(data.user.valid, data.user.starred)
@@ -52,10 +54,7 @@
       name: '',
       subject: '',
       comment: '',
-      gender: 'none',
-      race: 'none',
       captcha: '',
-      mile: 4,
       file: undefined as unknown as HTMLInputElement
    }
 
@@ -83,25 +82,20 @@
       taintedMessage: null,
       onResult: async ({ result }) => {
          if (result.type == 'success') {
-            $menu[0] = false
+            $menuActive[0] = false
             input.comment = ''
-            input.gender = 'none'
-            input.race = 'none'
             input.name = ''
             input.subject = ''
             if (input.file) input.file.value = ''
          } else {
-            //@ts-ignore
-            showMessage(getError(result.data.form.errors), 'error')
+            // @ts-ignore
+            const message = Object.entries(result.data.form.errors)[0][1] as string
+            showWindowMessage(message, 'error')
          }
 
-         busy.free()
+         $workLoad--
       }
    })
-
-   function getError(errors: object) {
-      return Object.entries(errors)[0][1]
-   }
 
    function onFileChange() {
       const file = input.file.files ? input.file.files[0] : null
@@ -113,7 +107,7 @@
       else fileOk = false
    }
 
-   async function showMessage(text: string, color: string) {
+   async function showWindowMessage(text: string, color: string) {
       message.text = text
       message.color = color
       message.show = true
@@ -261,17 +255,17 @@
 
 <!-- Thread Creation -->
 <Window
-   on:close={() => ($menu[0] = !$menu[0])}
-   add="top-32 right-20"
+   on:close={() => ($menuActive[0] = !$menuActive[0])}
+   add="top-32 right-32"
    py={34}
-   bind:show={$menu[0]}
+   bind:show={$menuActive[0]}
    bind:message
    title="New Thread"
 >
    <form method="POST" use:enhance class="form-control gap-2">
       <div class="flex gap-1">
          <input
-            tabindex={$menu[0] ? 0 : -1}
+            tabindex={$menuActive[0] ? 0 : -1}
             placeholder="Name"
             name="name"
             class:input-error={input.name.length > 50}
@@ -279,7 +273,7 @@
             class="input w-2/5 input-xs"
          />
          <input
-            tabindex={$menu[0] ? 0 : -1}
+            tabindex={$menuActive[0] ? 0 : -1}
             name="subject"
             bind:value={input.subject}
             placeholder="Subject"
@@ -290,7 +284,7 @@
          {#if data.user.valid}
             <div transition:fade|local class="ml-auto">
                <IconToggle
-                  bind:interact={$menu[0]}
+                  bind:interact={$menuActive[0]}
                   icon="icon-park-outline:message-sent"
                   name="DMs"
                   tip="allow DMs"
@@ -300,7 +294,7 @@
       </div>
 
       <textarea
-         tabindex={$menu[0] ? 0 : -1}
+         tabindex={$menuActive[0] ? 0 : -1}
          style:height="100px"
          style:max-height="150px"
          required
@@ -321,11 +315,10 @@
 
                   <input
                      tabindex={-1}
-                     checked
                      class="hidden"
                      type="radio"
+                     checked={!data.user.valid}
                      name="gender"
-                     bind:group={input.gender}
                      value="none"
                   />
 
@@ -335,11 +328,11 @@
                      {#if data.board.genders.includes(gender)}
                         <div class="flex {color} items-center">
                            <input
-                              tabindex={$menu[0] ? 0 : -1}
+                              tabindex={$menuActive[0] ? 0 : -1}
                               type="radio"
                               name="gender"
+                              checked={data.user.valid && data.user.gender == gender}
                               value={gender}
-                              bind:group={input.gender}
                               class="radio outline-none radio-xs"
                            />
                            <Icon {icon} width="22" height="22" />
@@ -352,15 +345,12 @@
             {#if data.board.races.length > 0}
                <div class="flex items-center">
                   <div class="badge font-bold badge-warning badge-sm mr-2">Race</div>
-                  <select
-                     tabindex={$menu[0] ? 0 : -1}
-                     name="race"
-                     bind:value={input.race}
-                     class="select select-xs"
-                  >
-                     <option value="none">None</option>
+                  <select tabindex={$menuActive[0] ? 0 : -1} name="race" class="select select-xs">
+                     <option selected={!data.user.valid} value="none">None</option>
                      {#each data.board.races as race}
-                        <option value={race}>{race.titleCase()}</option>
+                        <option selected={data.user.valid && data.user.race == race} value={race}>
+                           {race.titleCase()}
+                        </option>
                      {/each}
                   </select>
                </div>
@@ -378,7 +368,7 @@
 
             {#if data.user.valid && (data.user.verified || ['mod', 'founder'].includes(data.user.role))}
                <IconToggle
-                  bind:interact={$menu[0]}
+                  bind:interact={$menuActive[0]}
                   icon="material-symbols:verified"
                   name="require"
                   tip="verified gender/race"
@@ -392,7 +382,7 @@
 
                {#if data.board.genders.includes(gender)}
                   <IconToggle
-                     bind:interact={$menu[0]}
+                     bind:interact={$menuActive[0]}
                      {icon}
                      {color}
                      name="require"
@@ -407,7 +397,7 @@
 
                {#if data.board.races.includes(race)}
                   <IconToggle
-                     bind:interact={$menu[0]}
+                     bind:interact={$menuActive[0]}
                      {icon}
                      value={race}
                      name="require"
@@ -423,7 +413,13 @@
                <div class="badge font-bold badge-sm">thread</div>
                {#each stati as status}
                   {@const { icon, color } = icons.status[status]}
-                  <IconToggle {icon} name={status} {color} bind:interact={$menu[0]} tip={status} />
+                  <IconToggle
+                     {icon}
+                     name={status}
+                     {color}
+                     bind:interact={$menuActive[0]}
+                     tip={status}
+                  />
                {/each}
             </div>
          {/if}
@@ -432,7 +428,7 @@
       <div class="flex gap-1 justify-stretch items-center">
          <input
             in:slide|local={{ axis: 'x', delay: 0 }}
-            tabindex={$menu[0] ? 0 : -1}
+            tabindex={$menuActive[0] ? 0 : -1}
             required
             type="file"
             name="file"
@@ -443,26 +439,26 @@
          />
       </div>
 
-      {#if $menu[0] && !(data.user.valid && ['founder', 'mod'].includes(data.user.role))}
-         <div transition:slide|local class="mx-auto">
+      {#if $menuActive[0] && !(data.user.valid && ['founder', 'mod'].includes(data.user.role))}
+         <div transition:slide|local>
             <Captcha
                bind:value={input.captcha}
                add="rounded-lg"
                {errors}
-               bind:visible={$menu[0]}
+               bind:visible={$menuActive[0]}
                bind:stopTime
             />
          </div>
       {/if}
 
       <button
-         type={$menu[0] && canSubmit ? 'submit' : 'button'}
-         tabindex={$menu[0] && canSubmit ? 0 : -1}
+         type={$menuActive[0] && canSubmit ? 'submit' : 'button'}
+         tabindex={$menuActive[0] && canSubmit ? 0 : -1}
          class:btn-disabled={!canSubmit}
          disabled={!canSubmit}
          on:click={throttle(() => {
             stopTime = true
-            busy.now()
+            $workLoad++
          }, 5000)}
          class="btn outline-none btn-primary btn-xs text-xs normal-case"
       >
@@ -476,11 +472,11 @@
    {@const starredLocal = data.user.starred.filter((s) => s.board == data.slug.board)}
    <Window
       title="Thread Watcher"
-      on:close={() => ($menu[1] = !$menu[1])}
+      on:close={() => ($menuActive[1] = !$menuActive[1])}
       add="top-32 min-w-[295px] max-w-[310px] right-20"
       hadd="text-sm"
       py={34}
-      bind:show={$menu[1]}
+      bind:show={$menuActive[1]}
    >
       <nav>
          {#each starredLocal as { board, thread, threadNumber }}
@@ -493,7 +489,13 @@
                   id="unstar"
                   action="/{board}/{threadNumber}/?/unstar"
                >
-                  <input on:click={throttle(busy.now, 5000)} hidden type="submit" />
+                  <input
+                     on:click={throttle(() => {
+                        $workLoad++
+                     }, 5000)}
+                     hidden
+                     type="submit"
+                  />
                </form>
                <button
                   on:click={() => {
@@ -506,8 +508,10 @@
                </button>
                <a
                   class="link link-hover overflow-hidden whitespace-nowrap text-sm link-secondary"
-                  href="/{board}/{threadNumber}">({postCount}) /{board}/{threadNumber} - {title}</a
+                  href="/{board}/{threadNumber}"
                >
+                  ({postCount}) /{board}/{threadNumber} - {title}>
+               </a>
             </div>
          {/each}
       </nav>

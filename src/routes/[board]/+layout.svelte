@@ -1,6 +1,6 @@
 <script lang="ts">
    import Menu from '$lib/ui/Menu.svelte'
-   import { menu, menuClick, menuIcons } from '$lib/stores'
+   import { menuActive, menuClick, menuIcons } from '$lib/stores'
    import { keyboardClick } from '$lib/misc'
    import Icon from '@iconify/svelte'
    import { fade } from 'svelte/transition'
@@ -43,7 +43,7 @@
       - {board.description}
    </a>
 
-   {#if $menu.length > 0}
+   {#if $menuActive.length > 0}
       {@const size = 30}
 
       <Menu add="gap-1">
@@ -53,14 +53,14 @@
                in:fade|local={{ duration: 200 }}
                class="outline-none"
                on:click={() => {
-                  if ($menu[i]) $menuClick[i].off()
+                  if ($menuActive[i]) $menuClick[i].off()
                   else $menuClick[i].on()
 
-                  $menu[i] = !$menu[i]
+                  $menuActive[i] = !$menuActive[i]
                }}
                tabindex="0"
             >
-               <div style:transition="color 200ms ease" class:text-primary={$menu[i]}>
+               <div style:transition="color 200ms ease" class:text-primary={$menuActive[i]}>
                   <Icon class="px-1" {icon} width={size} height={size} />
                </div>
             </button>

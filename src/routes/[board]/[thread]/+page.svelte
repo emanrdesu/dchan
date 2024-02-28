@@ -1,7 +1,7 @@
 <script lang="ts">
    import Icon from '@iconify/svelte'
    import { superForm } from 'sveltekit-superforms/client'
-   import { busy, menu, menuClick, setMenu, work } from '$lib/stores'
+   import { menuActive, menuClick, setMenu, workLoad } from '$lib/stores'
    import { regex, bool, icons, keyboardClick, sign, genders } from '$lib/misc'
 
    import Window from '$lib/ui/Window.svelte'
@@ -19,7 +19,7 @@
 
    export let data
 
-   let valid = data.user.valid
+   let userValid = data.user.valid
 
    function menuSetup(option = { keep0: false }) {
       if (data.user.valid) {
@@ -33,7 +33,7 @@
 
          for (const star of data.user.starred) {
             if (star.board == data.slug.board && star.threadNumber == +data.slug.thread) {
-               $menu[1] = true
+               $menuActive[1] = true
                break
             }
          }
@@ -46,8 +46,8 @@
 
    // @ts-ignore
    const checkValidity = (_) => {
-      if (valid != data.user.valid) {
-         valid = data.user.valid
+      if (userValid != data.user.valid) {
+         userValid = data.user.valid
          menuSetup({ keep0: true })
       }
    }
@@ -83,9 +83,6 @@
    onMount(() => {
       addQuoteListeners()
 
-      if (data.user.valid) {
-      }
-
       return () => {
          for (const [q, entry] of listeners)
             for (const [listener, action] of Object.entries(entry))
@@ -100,15 +97,13 @@
    const input = {
       name: '',
       comment: '',
-      gender: 'none',
-      race: 'none',
       captcha: '',
-      sage: false,
       file: undefined as unknown as HTMLInputElement
    }
 
    let fileGiven = false
    let fileOk = false
+   let stopTime = false
 
    $: canSubmit =
       (!fileGiven || (fileGiven && fileOk)) &&
@@ -128,18 +123,20 @@
       taintedMessage: null,
       onResult: ({ result }) => {
          if (result.type == 'success') {
-            $menu[0] = false
+            $menuActive[0] = false
             input.comment = ''
             input.name = ''
             input.captcha = ''
             input.file.value = ''
             fileGiven = false
+            data.user.points++
          } else {
             // @ts-ignore
-            showMessage(getError(result.data.form.errors), 'error')
+            const message = Object.entries(result.data.form.errors)[0][1] as string
+            showWindowMessage(message, 'error')
          }
 
-         busy.free()
+         $workLoad--
       }
    })
 
@@ -153,11 +150,7 @@
       else fileOk = false
    }
 
-   function getError(errors: object) {
-      return Object.entries(errors)[0][1]
-   }
-
-   async function showMessage(text: string, color: string) {
+   async function showWindowMessage(text: string, color: string) {
       message = { text, color, show: true }
       await tick()
 
@@ -170,13 +163,14 @@
 </script>
 
 {#if data.user.valid}
-   {#if $menu[1]}
+   {@const addWork = throttle(() => $workLoad++, 5000)}
+   {#if $menuActive[1]}
       <form class="hidden" method="POST" use:enhance id="star" action="?/unstar">
-         <input on:click={throttle(busy.now, 5000)} hidden type="submit" />
+         <input on:click={addWork} hidden type="submit" />
       </form>
    {:else}
       <form class="hidden" method="POST" use:enhance id="star" action="?/star">
-         <input on:click={throttle(busy.now, 5000)} hidden type="submit" />
+         <input on:click={addWork} hidden type="submit" />
       </form>
    {/if}
 {/if}
@@ -192,17 +186,17 @@
 </div>
 
 <Window
-   on:close={() => ($menu[0] = !$menu[0])}
+   on:close={() => ($menuActive[0] = !$menuActive[0])}
    add="top-32 w-[300px] right-20"
    py={34}
-   bind:show={$menu[0]}
+   bind:show={$menuActive[0]}
    bind:message
    title="New Post"
 >
    <form action="?/post" method="POST" use:enhance class="form-control gap-2">
       <div class="flex gap-2">
          <input
-            tabindex={$menu[0] ? 0 : -1}
+            tabindex={$menuActive[0] ? 0 : -1}
             placeholder="Name"
             name="name"
             class:input-error={input.name.length > 50}
@@ -215,7 +209,7 @@
                icon="icon-park-outline:message-sent"
                name="DMs"
                tip="Allow DMs"
-               bind:interact={$menu[0]}
+               bind:interact={$menuActive[0]}
             />
          {/if}
 
@@ -224,12 +218,12 @@
             name="sage"
             color="text-success"
             tip="sage"
-            bind:interact={$menu[0]}
+            bind:interact={$menuActive[0]}
          />
       </div>
 
       <textarea
-         tabindex={$menu[0] ? 0 : -1}
+         tabindex={$menuActive[0] ? 0 : -1}
          style:height="100px"
          style:max-height="150px"
          style:line-height="1.1"
@@ -249,11 +243,10 @@
 
                   <input
                      tabindex={-1}
-                     checked
+                     checked={!data.user.valid}
                      class="hidden"
                      type="radio"
                      name="gender"
-                     bind:group={input.gender}
                      value="none"
                   />
 
@@ -263,11 +256,11 @@
                      {#if data.thread.genders.includes(gender)}
                         <div class="flex {color} items-center">
                            <input
-                              tabindex={$menu[0] ? 0 : -1}
+                              tabindex={$menuActive[0] ? 0 : -1}
+                              checked={data.user.valid && data.user.gender == gender}
                               type="radio"
                               name="gender"
                               value={gender}
-                              bind:group={input.gender}
                               class="radio outline-none radio-xs"
                            />
                            <Icon {icon} width="22" height="22" />
@@ -280,15 +273,12 @@
             {#if data.thread.races.length > 0}
                <div class="flex items-center">
                   <div class="badge font-bold badge-warning badge-sm mr-2">Race</div>
-                  <select
-                     tabindex={$menu[0] ? 0 : -1}
-                     bind:value={input.race}
-                     name="race"
-                     class="select select-xs"
-                  >
-                     <option value="none">None</option>
+                  <select tabindex={$menuActive[0] ? 0 : -1} name="race" class="select select-xs">
+                     <option selected={!data.user.valid} value="none">None</option>
                      {#each data.thread.races as race}
-                        <option value={race}>{race.titleCase()}</option>
+                        <option selected={data.user.valid && data.user.race == race} value={race}>
+                           {race.titleCase()}
+                        </option>
                      {/each}
                   </select>
                </div>
@@ -299,7 +289,7 @@
       <div class="flex gap-1 justify-stretch items-center">
          <input
             in:slide|local={{ axis: 'x', delay: 0 }}
-            tabindex={$menu[0] ? 0 : -1}
+            tabindex={$menuActive[0] ? 0 : -1}
             type="file"
             name="file"
             bind:this={input.file}
@@ -308,19 +298,28 @@
          />
       </div>
 
-      {#if $menu[0] && !(data.user.valid && ['founder', 'mod'].includes(data.user.role))}
-         <div transition:slide|local class="mx-auto">
-            <Captcha bind:value={input.captcha} add="rounded-lg" {errors} bind:visible={$menu[0]} />
+      {#if $menuActive[0] && !(data.user.valid && ['founder', 'mod'].includes(data.user.role))}
+         <div transition:slide|local>
+            <Captcha
+               bind:stopTime
+               bind:value={input.captcha}
+               add="rounded-lg"
+               {errors}
+               bind:visible={$menuActive[0]}
+            />
          </div>
       {/if}
 
       <button
-         type={$menu[0] && canSubmit ? 'submit' : 'button'}
-         tabindex={$menu[0] && canSubmit ? 0 : -1}
+         class="btn outline-none btn-primary btn-xs text-xs normal-case"
+         type={$menuActive[0] && canSubmit ? 'submit' : 'button'}
+         tabindex={$menuActive[0] && canSubmit ? 0 : -1}
          class:btn-disabled={!canSubmit}
          disabled={!canSubmit}
-         on:click={throttle(busy.now, 5000)}
-         class="btn outline-none btn-primary btn-xs text-xs normal-case"
+         on:click={throttle(() => {
+            stopTime = true
+            $workLoad++
+         }, 5000)}
       >
          Submit
       </button>

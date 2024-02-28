@@ -121,18 +121,6 @@ export const actions: Actions = {
                return err('name', 'Thread is archived')
 
          if (thread.verified) {
-            console.log(user.role)
-            console.log(user.gender)
-            console.log(user.race)
-
-            console.log()
-
-            console.log(thread.races)
-            console.log(thread.genders)
-
-            console.log(thread.genders.includes(user.gender))
-            console.log(thread.races.includes(user.race))
-
             if (user.valid) {
                if (user.verified) {
                   if (!thread.genders.includes(user.gender))
@@ -217,11 +205,24 @@ export const actions: Actions = {
             if (value) postFormData.append(key, value)
          }
 
+         const checkpoint = {
+            postCreate: false,
+            countUpdate: false
+         }
+
          try {
             const post = await pb.collection('post').create<Post>(postFormData)
+            checkpoint.postCreate = true
+
+            if (user.valid) {
+               await pb.collection('user').update(user.id, {
+                  points: user.points + 1
+               })
+            }
 
             await bread.updateCount(1, file ? 1 : 0)
             await boarb.updateCount(1)
+            checkpoint.countUpdate = true
 
             const postCount = await bread.thread().then((t) => t.postCount)
             if (!thread.sticky && !form.data.sage && postCount <= board.bumpLimit)
@@ -239,7 +240,12 @@ export const actions: Actions = {
                }
             }
          } catch (e) {
-            return err('file', 'Something went wrong')
+            if (checkpoint.countUpdate) {
+               await bread.updateCount(-1, file ? -1 : 0)
+               await boarb.updateCount(-1)
+            }
+
+            return err('file', 'Invalid file')
          }
       }
 

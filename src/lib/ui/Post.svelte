@@ -27,7 +27,7 @@
    id={post.no.toString()}
    style:border-radius="4px"
    style:transition="background-color 200ms ease"
-   class="relative bg-neutral w-fit p-4 pl-3 {op ? 'py-3' : 'pt-2'}"
+   class="relative bg-neutral w-fit max-w-full p-4 pl-3 {op ? 'py-3' : 'pt-2'}"
    style:box-shadow="0 0 10px 0 rgba(0,0,0,.1)"
 >
    {#if op}

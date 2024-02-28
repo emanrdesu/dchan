@@ -3,14 +3,14 @@
    import { format, icons } from '$lib/misc'
    import Icon from '@iconify/svelte'
    import { onReplyHover, onReplyMove, onReplyLeave, scrollToID } from '$lib/events'
-   import { menu } from '$lib/stores'
+   import { menuActive } from '$lib/stores'
 
    export let post: Post
    export let add = ''
 
    function addReply(no: number) {
       return () => {
-         $menu[0] = true
+         $menuActive[0] = true
          const textarea = document.querySelector('textarea[name="comment"]') as HTMLInputElement
          textarea.value += `>>${no}\n`
          textarea.focus()
