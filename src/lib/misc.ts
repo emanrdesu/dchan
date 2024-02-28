@@ -26,33 +26,6 @@ export function minify(o: object, except = [] as string[], remove = [] as string
    return copy
 }
 
-// stdlib addition
-
-declare global {
-   interface String {
-      titleCase: () => string
-   }
-}
-
-declare global {
-   interface Array<T> {
-      promise: (x: T) => Promise<any[]>
-      randelt: () => T
-   }
-}
-
-String.prototype.titleCase = function () {
-   return this.charAt(0).toUpperCase() + this.slice(1)
-}
-
-Array.prototype.promise = function (f) {
-   return Promise.all(this.map(f))
-}
-
-Array.prototype.randelt = function () {
-   return this[Math.floor(Math.random() * this.length)]
-}
-
 export function show(o: any) {
    console.log(o)
    return o

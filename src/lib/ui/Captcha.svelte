@@ -60,8 +60,6 @@
    }
 </script>
 
-<!-- class:w-min={active}  -->
-
 <div class="{add} w-[273px] card bg-base-100 shadow-xl">
    <div class="p-3 card-body gap-4 flex-row items-center">
       <span

@@ -5,11 +5,12 @@
 
    import Menu from '$lib/ui/Menu.svelte'
    import IconText from '$lib/ui/IconText.svelte'
-   import { notifications, notify } from '$lib/stores'
+   import { busy, notifications, notify, work } from '$lib/stores'
    import { random } from '$lib/misc'
+   import {} from '$lib/stdplus'
 
    import type { LayoutServerData } from './$types'
-   import { goto, invalidate } from '$app/navigation'
+   import { afterNavigate, goto, invalidate } from '$app/navigation'
    import { fade } from 'svelte/transition'
    import Icon from '@iconify/svelte'
    import { navigating } from '$app/stores'
@@ -25,12 +26,20 @@
          } else {
             notify('Try again.')
          }
+
+         busy.free()
       }
    })
 
    onMount(() => {
       themeChange(false)
    })
+
+   afterNavigate(() => {
+      $work = []
+   })
+
+   $: busyTime = $work.length > 0
 </script>
 
 <div class="navbar sticky top-0 px-0 py-[2px] z-20 justify-center bg-base-300 min-h-8">
@@ -50,17 +59,25 @@
    </div>
 
    <div class="navbar-center mx-auto">
+      {#if busyTime}
+         <Icon icon="eos-icons:three-dots-loading" width={26} />
+      {/if}
+
       <button class="btn blout btn-ghost text-lg btn-sm px-1" on:click={() => goto('/')}>
          <IconText text="dchan">
             <Icon icon="ion:home" width={16} />
          </IconText>
       </button>
+
+      {#if busyTime}
+         <Icon icon="eos-icons:three-dots-loading" width={26} />
+      {/if}
    </div>
 
    <div class="end flex gap-3 mr-2">
       {#if data.user.valid}
          {@const user = data.user}
-         <div in:fade class="dropdown dropdown-bottom dropdown-end">
+         <div in:fade={{ duration: 500 }} class="dropdown dropdown-bottom dropdown-end">
             <div
                tabindex="0"
                style:transition="all 200ms ease"
@@ -78,7 +95,9 @@
                         <Icon icon="ant-design:setting-filled" />
                      </IconText>
                   </a>
-                  <button tabindex="0" type="submit"><span class="font-bold">logout</span></button>
+                  <button on:click={busy.now} tabindex="0" type="submit">
+                     <span class="font-bold">logout</span>
+                  </button>
                </Menu>
             </form>
          </div>
@@ -113,6 +132,7 @@
 
                   <button
                      type="submit"
+                     on:click={busy.now}
                      on:submit={() => invalidate('/api/user')}
                      class="btn btn-secondary btn-xs mt-2">Submit</button
                   >

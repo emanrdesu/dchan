@@ -66,7 +66,7 @@
    class:pointer-events-none={!show}
    bind:this={window}
    style:transition="opacity 300ms ease-in-out"
-   class="w-[330px] p-3 fixed z-10 bg-base-300 rounded-lg shadow-md w-fit {add}"
+   class="w-[328px] p-3 fixed z-10 bg-base-300 rounded-lg shadow-md {add}"
 >
    <div class="flex items-center gap-3 mb-3">
       <h1 on:mousedown|preventDefault={move} class="{hadd} cursor-grab whitespace-nowrap font-bold">

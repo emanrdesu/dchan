@@ -4,7 +4,7 @@
    import Captcha from '$lib/ui/Captcha.svelte'
    import IconToggle from '$lib/ui/IconToggle.svelte'
    import OpImage from '$lib/ui/part/OpImage.svelte'
-   import { menu, setMenu } from '$lib/stores'
+   import { busy, menu, setMenu } from '$lib/stores'
 
    import { fade, slide } from 'svelte/transition'
    import { flip } from 'svelte/animate'
@@ -22,6 +22,7 @@
       races,
       stati
    } from '$lib/misc'
+   import { throttle } from 'lodash'
 
    export let data
 
@@ -93,6 +94,8 @@
             //@ts-ignore
             showMessage(getError(result.data.form.errors), 'error')
          }
+
+         busy.free()
       }
    })
 
@@ -259,7 +262,7 @@
 <!-- Thread Creation -->
 <Window
    on:close={() => ($menu[0] = !$menu[0])}
-   add="top-32 w-[328px] right-20"
+   add="top-32 right-20"
    py={34}
    bind:show={$menu[0]}
    bind:message
@@ -441,10 +444,10 @@
       </div>
 
       {#if $menu[0] && !(data.user.valid && ['founder', 'mod'].includes(data.user.role))}
-         <div transition:slide|local>
+         <div transition:slide|local class="mx-auto">
             <Captcha
                bind:value={input.captcha}
-               add="w-full rounded-lg"
+               add="rounded-lg"
                {errors}
                bind:visible={$menu[0]}
                bind:stopTime
@@ -457,7 +460,10 @@
          tabindex={$menu[0] && canSubmit ? 0 : -1}
          class:btn-disabled={!canSubmit}
          disabled={!canSubmit}
-         on:click={() => (stopTime = true)}
+         on:click={throttle(() => {
+            stopTime = true
+            busy.now()
+         }, 5000)}
          class="btn outline-none btn-primary btn-xs text-xs normal-case"
       >
          Submit
@@ -487,7 +493,7 @@
                   id="unstar"
                   action="/{board}/{threadNumber}/?/unstar"
                >
-                  <input hidden type="submit" />
+                  <input on:click={throttle(busy.now, 5000)} hidden type="submit" />
                </form>
                <button
                   on:click={() => {

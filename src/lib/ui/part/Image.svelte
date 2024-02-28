@@ -1,4 +1,5 @@
 <script lang="ts">
+   import { busy } from '$lib/stores'
    import { createEventDispatcher, onMount } from 'svelte'
 
    export let url: string
@@ -14,15 +15,22 @@
          window.open(url, '_blank')
       } else {
          loaded = false
+         busy.now()
          full = !full
 
          dispatch('delta', { value: full })
       }
    }
 
+   const complete = () => {
+      loaded = true
+      busy.free()
+   }
+
    onMount(() => {
-      if (image.complete) loaded = true
-      image.onload = () => (loaded = true)
+      if (image.complete) complete()
+      image.onload = complete
+
       return () => {
          image.onload = null
       }

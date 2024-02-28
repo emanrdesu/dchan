@@ -44,3 +44,14 @@ export function notify(message: string, type = 'info', duration = 3000) {
       pop(notifications)
    }, duration)
 }
+
+export const work = writable([] as null[])
+export const busy = {
+   now() {
+      push(null, work)
+   },
+
+   free() {
+      pop(work)
+   }
+}

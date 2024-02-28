@@ -1,7 +1,7 @@
 <script lang="ts">
    import Icon from '@iconify/svelte'
    import { superForm } from 'sveltekit-superforms/client'
-   import { menu, menuClick, setMenu } from '$lib/stores'
+   import { busy, menu, menuClick, setMenu, work } from '$lib/stores'
    import { regex, bool, icons, keyboardClick, sign, genders } from '$lib/misc'
 
    import Window from '$lib/ui/Window.svelte'
@@ -15,6 +15,7 @@
    import { onReplyHover, onReplyLeave, onReplyMove, scrollToID } from '$lib/events'
    import { invalidate } from '$app/navigation'
    import { browser } from '$app/environment'
+   import { throttle } from 'lodash'
 
    export let data
 
@@ -137,6 +138,8 @@
             // @ts-ignore
             showMessage(getError(result.data.form.errors), 'error')
          }
+
+         busy.free()
       }
    })
 
@@ -169,11 +172,11 @@
 {#if data.user.valid}
    {#if $menu[1]}
       <form class="hidden" method="POST" use:enhance id="star" action="?/unstar">
-         <input hidden type="submit" />
+         <input on:click={throttle(busy.now, 5000)} hidden type="submit" />
       </form>
    {:else}
       <form class="hidden" method="POST" use:enhance id="star" action="?/star">
-         <input hidden type="submit" />
+         <input on:click={throttle(busy.now, 5000)} hidden type="submit" />
       </form>
    {/if}
 {/if}
@@ -190,7 +193,7 @@
 
 <Window
    on:close={() => ($menu[0] = !$menu[0])}
-   add="top-32 w-[329px] right-20"
+   add="top-32 w-[300px] right-20"
    py={34}
    bind:show={$menu[0]}
    bind:message
@@ -306,13 +309,8 @@
       </div>
 
       {#if $menu[0] && !(data.user.valid && ['founder', 'mod'].includes(data.user.role))}
-         <div transition:slide|local>
-            <Captcha
-               bind:value={input.captcha}
-               add="w-full rounded-lg"
-               {errors}
-               bind:visible={$menu[0]}
-            />
+         <div transition:slide|local class="mx-auto">
+            <Captcha bind:value={input.captcha} add="rounded-lg" {errors} bind:visible={$menu[0]} />
          </div>
       {/if}
 
@@ -321,6 +319,7 @@
          tabindex={$menu[0] && canSubmit ? 0 : -1}
          class:btn-disabled={!canSubmit}
          disabled={!canSubmit}
+         on:click={throttle(busy.now, 5000)}
          class="btn outline-none btn-primary btn-xs text-xs normal-case"
       >
          Submit
