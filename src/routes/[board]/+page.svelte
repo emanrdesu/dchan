@@ -28,8 +28,14 @@
 
    let userValid = data.user.valid
 
+   const getLocalStars = () => {
+      return data.user.starred.filter((s) => s.board == data.slug.board)
+   }
+
+   $: starredLocal = data.user.valid ? getLocalStars() : []
+
    function menuSetup(option = { keep0: false }) {
-      if (data.user.valid && data.user.starred.length > 0)
+      if (data.user.valid && getLocalStars().length > 0)
          setMenu(['gridicons:create', 'bytesize:eye', 'clarity:settings-line'], option)
       else setMenu(['gridicons:create', 'clarity:settings-line'], option)
    }
@@ -468,8 +474,7 @@
 </Window>
 
 <!-- Thread Watcher -->
-{#if data.user.valid && data.user.starred.length > 0}
-   {@const starredLocal = data.user.starred.filter((s) => s.board == data.slug.board)}
+{#if data.user.valid && starredLocal.length > 0}
    <Window
       title="Thread Watcher"
       on:close={() => ($menuActive[1] = !$menuActive[1])}
@@ -510,7 +515,7 @@
                   class="link link-hover overflow-hidden whitespace-nowrap text-sm link-secondary"
                   href="/{board}/{threadNumber}"
                >
-                  ({postCount}) /{board}/{threadNumber} - {title}>
+                  ({postCount}) /{board}/{threadNumber} - {title}
                </a>
             </div>
          {/each}

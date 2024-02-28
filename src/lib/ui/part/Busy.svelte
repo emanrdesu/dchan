@@ -5,11 +5,11 @@
    const busyIcons = [
       '3-dots-bounce',
       '3-dots-fade',
-      '3-dots-move',
-      '3-dots-rotate',
+      // '3-dots-move',
+      // '3-dots-rotate',
       '3-dots-scale',
       '3-dots-scale-middle',
-      'gooey-balls-2',
+      // 'gooey-balls-2',
       'bouncing-ball'
    ]
 
