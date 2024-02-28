@@ -154,6 +154,15 @@ export const actions: Actions = {
          }
 
          try {
+            if (user.valid) {
+               await pb.collection('starred').create({
+                  user: user.id,
+                  board: params.board,
+                  thread: thread.id,
+                  threadNumber: postData.no
+               })
+            }
+
             await pb.collection('post').create(postFormData)
          } catch {
             await pb.collection('thread').delete(thread.id)

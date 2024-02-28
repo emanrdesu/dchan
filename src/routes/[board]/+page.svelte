@@ -100,8 +100,11 @@
             showWindowMessage(message, 'error')
          }
 
-         await invalidate('/api/user')
-         menuSetup({ keep: 1 })
+         if (data.user.valid) {
+            await invalidate('/api/user')
+            menuSetup({ keep: 1 })
+         }
+
          $workLoad--
       }
    })
@@ -253,13 +256,14 @@
             {@html format.comment(op.comment)}
          </small>
 
-         {#if true}
+         {#if data.user.valid}
             {@const starred = find(
                starredLocal,
                (s) => s.board == data.board.name && s.threadNumber == op.no
             )}
 
             <div
+               transition:fade={{ duration: 200 }}
                class:opacity-0={data.user.valid && !starred}
                style:transition="opacity 200ms ease-in"
                class="absolute text-primary left-1 bottom-1"

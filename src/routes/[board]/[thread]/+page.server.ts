@@ -41,7 +41,13 @@ export const actions: Actions = {
       if (find(user.starred, (s) => s.board == params.board && s.threadNumber == +params.thread))
          return fail(409, { form })
 
-      const threadID = await fetch(`/api/${params.board}/${params.thread}?id`).then((r) => r.json())
+      let threadID
+
+      try {
+         threadID = await fetch(`/api/${params.board}/${params.thread}?id`).then((r) => r.json())
+      } catch {
+         return fail(400, { form })
+      }
 
       await pb.collection('starred').create({
          user: user.id,
