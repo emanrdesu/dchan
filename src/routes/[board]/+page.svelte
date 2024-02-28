@@ -22,7 +22,8 @@
       races,
       stati
    } from '$lib/misc'
-   import { throttle } from 'lodash'
+   import { find, throttle } from 'lodash'
+   import { invalidate } from '$app/navigation'
 
    export let data
 
@@ -34,7 +35,7 @@
 
    $: starredLocal = data.user.valid ? getLocalStars() : []
 
-   function menuSetup(option = { keep0: false }) {
+   function menuSetup(option: { keep: number } | null = null) {
       if (data.user.valid && getLocalStars().length > 0)
          setMenu(['gridicons:create', 'bytesize:eye', 'clarity:settings-line'], option)
       else setMenu(['gridicons:create', 'clarity:settings-line'], option)
@@ -46,11 +47,11 @@
    const checkValidity = (..._) => {
       if (userValid != data.user.valid) {
          userValid = data.user.valid
-         menuSetup({ keep0: true })
+         menuSetup({ keep: 0 })
       }
 
       if (userValid && data.user.starred.length == 0) {
-         menuSetup({ keep0: true })
+         menuSetup({ keep: 0 })
       }
    }
 
@@ -99,6 +100,8 @@
             showWindowMessage(message, 'error')
          }
 
+         await invalidate('/api/user')
+         menuSetup({ keep: 1 })
          $workLoad--
       }
    })
@@ -138,9 +141,9 @@
          style:box-shadow="0 0 10px 0 rgba(0,0,0,.2)"
          style:transition="background-color 200ms ease"
          class:cursor-zoom-out={expandHover}
-         class="p-2 hover:bg-neutral w-auto cursor-zoom-in
+         class="p-2 hover:bg-neutral cursor-zoom-in
                 {expandHover ? onHover : ''}
-                form-control items-center bg-base-100 rounded-md"
+                form-control items-center bg-base-100 rounded-md relative"
       >
          <span class="self-start w-full flex items-center justify-stretch gap-1 mb-1 flex-wrap">
             {#if true}
@@ -250,8 +253,23 @@
             {@html format.comment(op.comment)}
          </small>
 
+         {#if true}
+            {@const starred = find(
+               starredLocal,
+               (s) => s.board == data.board.name && s.threadNumber == op.no
+            )}
+
+            <div
+               class:opacity-0={data.user.valid && !starred}
+               style:transition="opacity 200ms ease-in"
+               class="absolute text-primary left-1 bottom-1"
+            >
+               <Icon icon="mingcute:star-fill" width={14} />
+            </div>
+         {/if}
+
          {#if op.race || op.gender}
-            <small class="text-xs italic text-neutral-content mt-auto self-end"
+            <small class="text-xs mt-auto italic text-neutral-content self-end"
                >t. {op.race} {op.gender}
             </small>
          {/if}

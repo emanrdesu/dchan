@@ -8,7 +8,7 @@ import validate from '$lib/validate'
 import type { Actions } from './$types'
 import type { PageServerLoad } from './$types'
 import type { Board, Post, Thread, User } from '$lib/types'
-import { findIndex } from 'lodash'
+import { find } from 'lodash'
 
 export const load: PageServerLoad = async ({ params, fetch }) => {
    const form = await superValidate(schema.post)
@@ -38,7 +38,7 @@ export const actions: Actions = {
       if (!user.valid) return fail(400, { form })
 
       // prettier-ignore
-      if (findIndex(user.starred, (s) => s.board == params.board && s.threadNumber == +params.thread) >= 0)
+      if (find(user.starred, (s) => s.board == params.board && s.threadNumber == +params.thread))
          return fail(409, { form })
 
       const threadID = await fetch(`/api/${params.board}/${params.thread}?id`).then((r) => r.json())

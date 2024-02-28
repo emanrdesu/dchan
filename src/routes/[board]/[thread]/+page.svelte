@@ -21,7 +21,7 @@
 
    let userValid = data.user.valid
 
-   function menuSetup(option = { keep0: false }) {
+   function menuSetup(option: { keep: number } | null = null) {
       if (data.user.valid) {
          setMenu(['gridicons:create', 'mingcute:star-fill'], option)
          const submitStar = () => {
@@ -48,7 +48,7 @@
    const checkValidity = (_) => {
       if (userValid != data.user.valid) {
          userValid = data.user.valid
-         menuSetup({ keep0: true })
+         menuSetup({ keep: 0 })
       }
    }
 
