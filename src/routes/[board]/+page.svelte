@@ -95,7 +95,6 @@
             input.subject = ''
             if (input.file) input.file.value = ''
          } else {
-            console.log('foo')
             // @ts-ignore
             const message = Object.entries(result.data.form.errors)[0][1] as string
             showWindowMessage(message, 'error')
@@ -257,20 +256,19 @@
             {@html format.comment(op.comment)}
          </small>
 
-         {#if data.user.valid}
+         {#if true}
             {@const starred = find(
                starredLocal,
                (s) => s.board == data.board.name && s.threadNumber == op.no
             )}
-
-            <div
-               transition:fade={{ duration: 200 }}
-               class:opacity-0={data.user.valid && !starred}
-               style:transition="opacity 200ms ease-in"
-               class="absolute text-primary left-1 bottom-1"
-            >
-               <Icon icon="mingcute:star-fill" width={14} />
-            </div>
+            {#if data.user.valid && starred}
+               <div
+                  transition:fade={{ duration: 200 }}
+                  class="absolute text-primary left-[10px] bottom-[10px]"
+               >
+                  <Icon icon="mingcute:star-fill" width={14} />
+               </div>
+            {/if}
          {/if}
 
          {#if op.race || op.gender}

@@ -18,19 +18,19 @@
    }
 </script>
 
-<div style:font-size="13px" class="flex {add} flex-wrap gap-1 mb-1 items-center">
-   <span class="text-primary-focus font-bold">
+<div style:font-size="13px" class="flex {add} flex-wrap mb-1 items-center">
+   <span class="text-primary-focus font-bold mr-1">
       {post.name || 'Anonymous'}
    </span>
 
    {#if post.trip}
-      <span class="text-accent">
+      <span class="text-accent mr-1">
          !{post.trip}
       </span>
    {/if}
 
    {#if post.race || post.gender}
-      <div class="flex">
+      <div class="flex mr-1">
          {#if post.race}
             {@const size = 15}
             {@const icon = icons.race[post.race]}
@@ -50,11 +50,11 @@
    {/if}
 
    {#if post.subject}
-      <div class="font-bold text-primary">{post.subject}</div>
+      <div class="font-bold text-primary mr-1">{post.subject}</div>
    {/if}
 
    <div class="tooltip tooltip-bottom" data-tip={format.timeago(post.created)}>
-      <span>{format.date(post.created)}</span>
+      <span class="mr-1">{format.date(post.created)}</span>
    </div>
 
    <div class="link link-secondary mr-1">
@@ -63,24 +63,22 @@
       >
    </div>
 
-   <div class="flex flex-wrap">
-      {#each post.replies.match(/\d+/g) || [] as reply}
-         {@const size = 18}
-         {@const icon = 'basil:reply-solid'}
-         <span
-            class="cursor-pointer"
-            on:mouseenter={onReplyHover(reply)}
-            on:click={scrollToID(reply)}
-            on:mouseleave={onReplyLeave(reply)}
-            on:mousemove={onReplyMove(reply)}
-         >
-            <Icon
-               class="r{reply} opacity-70 hover:opacity-100 transition-opacity text-success"
-               {icon}
-               width={size}
-               height={size}
-            />
-         </span>
-      {/each}
-   </div>
+   {#each post.replies.match(/\d+/g) || [] as reply}
+      {@const size = 18}
+      {@const icon = 'basil:reply-solid'}
+      <span
+         class="cursor-pointer"
+         on:mouseenter={onReplyHover(reply)}
+         on:click={scrollToID(reply)}
+         on:mouseleave={onReplyLeave(reply)}
+         on:mousemove={onReplyMove(reply)}
+      >
+         <Icon
+            class="r{reply} opacity-70 hover:opacity-100 transition-opacity text-success"
+            {icon}
+            width={size}
+            height={size}
+         />
+      </span>
+   {/each}
 </div>

@@ -1,11 +1,10 @@
 <script lang="ts">
    import type { Board, Post, Thread } from '$lib/types'
    import { sign, format, icons, mininfo, races, genders, stati } from '$lib/misc'
-   import { fly } from 'svelte/transition'
+   import { fade } from 'svelte/transition'
    import Header from '$lib/ui/part/Header.svelte'
 
    import Icon from '@iconify/svelte'
-   import { cubicInOut } from 'svelte/easing'
    import Image from './part/Image.svelte'
 
    export let post: Post
@@ -23,7 +22,7 @@
 </script>
 
 <div
-   in:fly={{ delay: 400, x: randomLength(300, 300), easing: cubicInOut }}
+   in:fade={{ delay: 300 }}
    id={post.no.toString()}
    style:border-radius="4px"
    style:transition="background-color 200ms ease"

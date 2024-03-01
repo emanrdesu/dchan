@@ -71,7 +71,7 @@
       {#if data.user.valid}
          {@const user = data.user}
 
-         <div class="tooltip -mr-2 tooltip-bottom" data-tip="Your points">
+         <div class="tooltip -mr-2 tooltip-bottom" data-tip="your points">
             {#key user.points}
                <small
                   in:fade={{ delay: 200, duration: 200 }}
