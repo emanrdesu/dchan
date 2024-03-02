@@ -30,7 +30,7 @@
    let userValid = data.user.valid
 
    const getLocalStars = () => {
-      return data.user.starred.filter((s) => s.board == data.slug.board)
+      return data.user.starred.reverse().filter((s) => s.board == data.slug.board)
    }
 
    $: starredLocal = data.user.valid ? getLocalStars() : []
@@ -499,7 +499,7 @@
    <Window
       title="Thread Watcher"
       on:close={() => ($menuActive[1] = !$menuActive[1])}
-      add="top-32 min-w-[295px] max-w-[310px] right-20"
+      add="top-32 min-w-[295px] max-h-[50vh] overflow-y-scroll max-w-[310px] right-20"
       hadd="text-sm"
       py={34}
       bind:show={$menuActive[1]}
@@ -533,7 +533,7 @@
                   <Icon class="hover:text-warning hover:cursor-pointer" icon="typcn:delete" />
                </button>
                <a
-                  class="link link-hover overflow-hidden whitespace-nowrap text-sm link-secondary"
+                  class="link link-hover overflow-hidden whitespace-nowrap text-xs link-secondary"
                   href="/{board}/{threadNumber}"
                >
                   ({postCount}) /{board}/{threadNumber} - {title}

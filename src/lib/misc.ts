@@ -68,7 +68,7 @@ export const keyboardClick = (e: KeyboardEvent) => {
 
 export const format = {
    title(t: string) {
-      return take(t.split('\n\r')[0].split(' '), 6).join(' ').slice(0, 50)
+      return take(t.split('\n\r')[0].split(' '), 10).join(' ').slice(0, 50)
    },
 
    date(d: string) {
