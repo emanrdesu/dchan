@@ -10,8 +10,9 @@ import type { PageServerLoad } from './$types'
 import type { Board, Post, Thread, User } from '$lib/types'
 import { find } from 'lodash'
 
-export const load: PageServerLoad = async ({ params, fetch }) => {
+export const load: PageServerLoad = async ({ depends, params, fetch }) => {
    const form = await superValidate(schema.post)
+   depends('thread')
 
    const link = `/api/${params.board}/${params.thread}`
    const { message, thread, posts } = await fetch(link).then((r) => r.json())

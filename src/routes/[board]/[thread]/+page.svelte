@@ -1,7 +1,7 @@
 <script lang="ts">
    import Icon from '@iconify/svelte'
    import { superForm } from 'sveltekit-superforms/client'
-   import { menuActive, menuClick, setMenu, workLoad } from '$lib/stores'
+   import { menuActive, menuClick, notify, setMenu, workLoad } from '$lib/stores'
    import { regex, bool, icons, keyboardClick, genders } from '$lib/misc'
 
    import Window from '$lib/ui/Window.svelte'
@@ -10,35 +10,74 @@
    import IconToggle from '$lib/ui/IconToggle.svelte'
 
    import { afterUpdate, onMount, tick } from 'svelte'
-   import { fly, slide } from 'svelte/transition'
+   import { fade, fly, slide } from 'svelte/transition'
 
    import { onReplyHover, onReplyLeave, onReplyMove, scrollToID } from '$lib/events'
-   import { invalidate } from '$app/navigation'
+   import { goto, invalidate } from '$app/navigation'
    import { browser } from '$app/environment'
    import { throttle } from 'lodash'
    import type { Filter, Post as Pozt } from '$lib/types'
+   import { tweened } from 'svelte/motion'
 
    export let data
 
+   const route = `/${data.slug.board}/${data.slug.thread}`
    let userValid = data.user.valid
 
-   function menuSetup(option: { keep: number[] } | null = null) {
-      if (data.user.valid) {
-         setMenu(['gridicons:create', 'mingcute:star-fill'], option)
-         const submitStar = () => {
-            const submit = document.querySelector('#star input') as HTMLInputElement
-            submit.click()
-         }
+   let refreshInterval: NodeJS.Timeout
+   let refreshMode = false
+   let timer = tweened(30, { duration: 1000 * 30 })
 
-         $menuClick[1] = { on: submitStar, off: submitStar }
+   const fetchInfo = (x: string) =>
+      fetch(`/api${route}?${x}`)
+         .then((r) => r.json())
+         .catch((r) => goto(`/${data.slug.board}`))
+
+   function menuSetup(option: { keep: number[] } | null = null) {
+      let menu = ['gridicons:create', 'tabler:reload']
+
+      if (data.user.valid) {
+         menu.push('mingcute:star-fill')
 
          for (const star of data.user.starred) {
             if (star.board == data.slug.board && star.threadNumber == +data.slug.thread) {
-               $menuActive[1] = true
+               $menuActive[2] = true
                break
             }
          }
-      } else setMenu(['gridicons:create'], option)
+      }
+
+      setMenu(menu, option)
+      $menuClick[1] = {
+         on() {
+            refreshMode = true
+            timer.set(30, { duration: 0 })
+            $timer = 0
+            refreshInterval = setTimeout(async () => {
+               const updated: string = await fetchInfo('updated')
+               const postCount: number = await fetchInfo('postCount')
+
+               if (new Date(updated) > new Date(data.thread.updated)) {
+                  const diff = postCount - data.thread.postCount
+                  notify(`${diff} new post${diff == 1 ? '' : 's'}`)
+                  invalidate('thread')
+               }
+
+               this.on()
+            }, 1000 * 30)
+         },
+
+         off() {
+            refreshMode = false
+            clearInterval(refreshInterval)
+         }
+      }
+
+      if (data.user.valid) {
+         // @ts-ignore
+         const submitStar = () => document.querySelector('#star input').click()
+         $menuClick[2] = { on: submitStar, off: submitStar }
+      }
 
       if (browser) invalidate('/api/user')
    }
@@ -127,6 +166,8 @@
                q.removeEventListener(listener, action)
 
          listeners.clear()
+         // @ts-ignore
+         clearInterval(refreshInterval)
       }
    })
 
@@ -196,11 +237,19 @@
          message = { text, color, show: false }
       }, 3000)
    }
+
+   const leading0 = (x: string) => (x.length == 1 ? '0' : '') + x
 </script>
+
+{#if refreshMode}
+   <span transition:fade class="badge font-bold badge-secondary fixed bottom-2 right-2">
+      {leading0($timer.toFixed(0))}
+   </span>
+{/if}
 
 {#if data.user.valid}
    {@const addWork = throttle(() => $workLoad++, 5000)}
-   {#if $menuActive[1]}
+   {#if $menuActive[2]}
       <form class="hidden" method="POST" use:enhance id="star" action="?/unstar">
          <input on:click={addWork} hidden type="submit" />
       </form>
