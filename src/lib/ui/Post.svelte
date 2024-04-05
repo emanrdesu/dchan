@@ -107,7 +107,7 @@
       <Header {post} />
    {/if}
 
-   <div class="overflow-auto leading-4">
+   <div class="overflow-hidden leading-4">
       {#if post.media}
          {@const filename = format.filename(post.media)}
          <div class="float-left mr-3 form-control items-center">

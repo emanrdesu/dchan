@@ -33,6 +33,17 @@
          .then((r) => r.json())
          .catch((r) => goto(`/${data.slug.board}`))
 
+   async function tryUpdate() {
+      const updated: string = await fetchInfo('updated')
+      const postCount: number = await fetchInfo('postCount')
+
+      if (new Date(updated) > new Date(data.thread.updated)) {
+         const diff = postCount - data.thread.postCount
+         notify(`${diff} new post${diff == 1 ? '' : 's'}`)
+         invalidate('thread')
+      }
+   }
+
    function menuSetup(option: { keep: number[] } | null = null) {
       let menu = ['gridicons:create', 'tabler:reload']
 
@@ -54,15 +65,7 @@
             timer.set(30, { duration: 0 })
             $timer = 0
             refreshInterval = setTimeout(async () => {
-               const updated: string = await fetchInfo('updated')
-               const postCount: number = await fetchInfo('postCount')
-
-               if (new Date(updated) > new Date(data.thread.updated)) {
-                  const diff = postCount - data.thread.postCount
-                  notify(`${diff} new post${diff == 1 ? '' : 's'}`)
-                  invalidate('thread')
-               }
-
+               await tryUpdate()
                this.on()
             }, 1000 * 30)
          },
@@ -242,9 +245,19 @@
 </script>
 
 {#if refreshMode}
-   <span transition:fade class="badge font-bold badge-secondary fixed bottom-2 right-2">
+   <button
+      tabindex="0"
+      on:click={() => {
+         tryUpdate()
+         clearInterval(refreshInterval)
+         $menuClick[1].on()
+      }}
+      on:keydown={keyboardClick}
+      transition:fade
+      class="btn btn-secondary btn-sm p-2 cursor-pointer fixed bottom-2 right-2"
+   >
       {leading0($timer.toFixed(0))}
-   </span>
+   </button>
 {/if}
 
 {#if data.user.valid}

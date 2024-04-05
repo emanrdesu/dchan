@@ -205,7 +205,7 @@ const choices = {
       'If you could also not come back, ever.'
    ],
 
-   success: ['Success.', 'Deed = Done.', 'Done.', "All's good.", 'Finished.']
+   success: ['Success.', 'Deed = Done.', 'Done.', "All's good.", 'Finished.', '👍']
 }
 
 export const random = {
