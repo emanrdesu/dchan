@@ -7,13 +7,14 @@ Is an anoymous imageboard with optional accounts that let you "attach" informati
 ### Features
 1. Optional user accounts
 2. Themes
-3. No registration with email
+3. No registration with email/phone
 4. Modern look and feel
 
-#### Future
+#### TODO
 - User messaging system
-- Local threads (set to a mile radius)
 - User verification for and by users
+- Moderation for and by users (using a points system)
+- Shop system
 
 ## Stack/Tech
 - Svelte + SvelteKit
@@ -27,6 +28,3 @@ Is an anoymous imageboard with optional accounts that let you "attach" informati
 ![Board](/static/board.png)
 ![Post](/static/post.png)
 ![Thread](/static/thread.png)
-
-## Setup
-Since it's not hosted yet, to see it in a localhost version. Just run `npm run dev -- --open` and `./pocketbase serve` in the root directory after downloading pocketbase onto the directory and installing packages.
