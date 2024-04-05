@@ -146,8 +146,11 @@ export const actions: Actions = {
 
          // gender + race
          for (const attr of ['gender', 'race'] as ('gender' | 'race')[]) {
-            const { valid, message } = validate.attr(attr, form.data[attr], thread)
-            if (!valid) return err(attr, message)
+            const value = formData.get(attr) as string | null
+            if (value) {
+               const { valid, message } = validate.attr(attr, value, thread)
+               if (!valid) return err(attr, message)
+            }
          }
 
          // captcha

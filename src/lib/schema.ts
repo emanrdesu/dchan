@@ -25,8 +25,14 @@ const base = {
    post: {
       name: z.string().trim().max(50, 'Name too large.'),
       comment: z.string().trim().max(2000, 'Comment too large.'),
-      gender: z.string().regex(rxa(rx.genders, /^none$/), 'Gender invalid.'),
-      race: z.string().regex(rxa(rx.races, /^none$/), 'Race invalid.'),
+      gender: z
+         .string()
+         .regex(rxa(rx.genders, /^none$/), 'Gender invalid.')
+         .optional(),
+      race: z
+         .string()
+         .regex(rxa(rx.races, /^none$/), 'Race invalid.')
+         .optional(),
       DMs: z.boolean().optional(),
       file: z.any().optional(),
       filename: z.string().max(200, 'Filename too big.').optional(),
