@@ -2,11 +2,16 @@
 declare global {
    interface String {
       titleCase: () => string
+      toRegex: () => RegExp
    }
 }
 
 String.prototype.titleCase = function () {
    return this.charAt(0).toUpperCase() + this.slice(1)
+}
+
+String.prototype.toRegex = function (o = 'g') {
+   return new RegExp(this + '', o)
 }
 
 // Array

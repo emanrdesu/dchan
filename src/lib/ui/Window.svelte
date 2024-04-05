@@ -1,4 +1,5 @@
 <script lang="ts">
+   import { navigating } from '$app/stores'
    import Icon from '@iconify/svelte'
    import { createEventDispatcher, onMount } from 'svelte'
    import { fly } from 'svelte/transition'
@@ -62,7 +63,7 @@
 
 <div
    class:opacity-0={!show}
-   class:opacity-100={show}
+   class:opacity-100={show && !$navigating}
    class:pointer-events-none={!show}
    bind:this={window}
    style:transition="opacity 300ms ease-in-out"

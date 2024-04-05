@@ -1,7 +1,8 @@
 import { pb, cleanup } from '$lib/pocketbase'
-import type { Session, Starred, Thread, User } from '$lib/types'
+import type { Board, Filter, Session, Starred, Thread, User } from '$lib/types'
 import { json } from '@sveltejs/kit'
 import type { RequestHandler } from './$types'
+import { minify } from '$lib/misc'
 
 export const GET: RequestHandler = async ({ cookies }) => {
    cleanup.session()
@@ -16,12 +17,26 @@ export const GET: RequestHandler = async ({ cookies }) => {
 
          const starred: Starred[] = await pb.collection('starred').getFullList({
             filter: `user = "${(session.expand.user as User).id}"`,
-            expand: 'thread'
+            expand: 'thread',
+            batch: 1000
+         })
+
+         const filters: Filter[] = await pb.collection('filter').getFullList({
+            filter: `user = "${(session.expand.user as User).id}"`,
+            expand: 'board',
+            batch: 1000
          })
 
          return json({
             ...session.expand.user,
             valid: true,
+
+            // prettier-ignore
+            filters: filters.map(f => new Object({
+               ...minify(f, ['id']),
+               board: (f.expand.board as Board).name
+            })),
+
             // prettier-ignore
             starred: starred.map(s => new Object({
                board: s.board,

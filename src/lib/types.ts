@@ -39,8 +39,8 @@ export interface Board extends Record {
    color: string
    description: string
    category: string
-   genders: string[]
-   races: string[]
+   genders: gender[]
+   races: race[]
    nsfw: boolean
    imageOnly: boolean
    threadCap: number
@@ -56,8 +56,8 @@ export interface Thread extends Record {
    closed: boolean
    archived: boolean
    verified: boolean
-   genders: string[]
-   races: string[]
+   genders: gender[]
+   races: race[]
    postCount: number
    imageCount: number
 }
@@ -82,6 +82,7 @@ export interface Post extends Record {
 export interface User extends Record {
    valid: boolean
    starred: Starred[]
+   filters: Filter[]
 
    username: string
    password: string
@@ -99,4 +100,17 @@ export interface Starred extends Record {
    board: string
    thread: Thread
    threadNumber: number
+}
+
+export interface Filter extends Record {
+   user: string // id
+   board: string // id
+   op: boolean
+   post: boolean
+   gender: gender[]
+   race: race[]
+   name: string
+   subject: string
+   comment: string
+   media: string
 }

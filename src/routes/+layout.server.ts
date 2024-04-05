@@ -14,5 +14,5 @@ export const load: LayoutServerLoad = async ({ request, fetch }) => {
       })
 
    const form = await superValidate(request, schema.login)
-   return { user: minify(user, ['expand']) as User, form }
+   return { user: minify(user, ['expand', 'id']) as User, form }
 }

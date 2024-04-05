@@ -3,6 +3,8 @@ import type { gender, race, status } from '$lib/types'
 import { difference, intersection, take } from 'lodash'
 import des3 from 'crypto-js/tripledes'
 import CryptoJS from 'crypto-js'
+import { setError } from 'sveltekit-superforms/server'
+import { fail } from '@sveltejs/kit'
 
 export function minify(o: object, except = [] as string[], remove = [] as string[]): object {
    const useless = ['collectionId', 'collectionName', 'expand', 'id', 'updated', 'created']
@@ -26,9 +28,17 @@ export function minify(o: object, except = [] as string[], remove = [] as string
    return copy
 }
 
-export function show(o: any) {
+export function show<T>(o: T) {
    console.log(o)
    return o
+}
+
+// @ts-ignore
+export function errorer(form) {
+   return (field: any, message: string, status = 400) => {
+      setError(form, field, message)
+      return fail(status, { form })
+   }
 }
 
 export const icons = {
@@ -189,11 +199,13 @@ const choices = {
       'Decided to finally touch grass?',
       'Finally, no more of you.',
       'Also, try deleting your account.',
-      'Go do your homework nigga.',
+      `Go do your homework ${'n' + 'i' + 'g' + 'g' + 'a'}.`,
       'Go do your laundry, swine.',
       "I'm too good for you anyways.",
       'If you could also not come back, ever.'
-   ]
+   ],
+
+   success: ['Success.', 'Deed = Done.', 'Done.', "All's good.", 'Finished.']
 }
 
 export const random = {
@@ -216,6 +228,10 @@ export const random = {
 
    goodbye() {
       return choices.bye.randelt()
+   },
+
+   success() {
+      return choices.success.randelt()
    }
 }
 
@@ -239,17 +255,6 @@ export function mininfo(arrayA: string[], arrayB: string[]) {
    return {
       exclude: test,
       array: test ? diff : int
-   }
-}
-
-export const sign = {
-   value: -1,
-   reset() {
-      this.value = -1
-   },
-
-   flip() {
-      return (this.value *= -1)
    }
 }
 

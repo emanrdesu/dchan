@@ -25,7 +25,8 @@ export function setMenu(list: string[], option: { keep: number[] } | null) {
    menuClick.set(new Array(list.length).fill({ on: noop, off: noop }))
 }
 
-export const notifications = writable([] as string[])
+type Notification = { message: string; color: string }
+export const notifications = writable([] as Notification[])
 
 function push<X>(x: X, w: Writable<X[]>) {
    w.update((xs) => {
@@ -41,8 +42,8 @@ function pop(w: Writable<any[]>) {
    })
 }
 
-export function notify(message: string, duration = 4000) {
-   push(message, notifications)
+export function notify(message: string, color = 'neutral', duration = 4000) {
+   push({ message, color }, notifications)
 
    setTimeout(() => {
       pop(notifications)

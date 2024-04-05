@@ -165,9 +165,9 @@
 
 {#if $notifications.length > 0}
    <div class="toast">
-      {#each $notifications as notification, i}
+      {#each $notifications as { message, color }}
          <div style:box-shadow="0 0 10px 0 rgba(0,0,0,.2)" class="alert bg-neutral p-2 rounded-md">
-            <span class="text-sm font-bold">{notification}</span>
+            <span class="text-sm font-bold text-{color}">{message}</span>
          </div>
       {/each}
    </div>

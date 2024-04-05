@@ -61,5 +61,16 @@ export default {
 
       sticky: z.boolean().optional(),
       closed: z.boolean().optional()
+   }),
+
+   filter: z.object({
+      op: z.string().regex(/^on$/).optional(),
+      post: z.string().regex(/^on$/).optional(),
+      gender: z.array(z.string().regex(rx.genders)).optional(),
+      race: z.array(z.string().regex(rx.races)).optional(),
+      name: z.string().max(200, 'Regex too long').optional(),
+      subject: z.string().max(200, 'Regex too long').optional(),
+      comment: z.string().max(200, 'Regex too long').optional(),
+      filename: z.string().max(200, 'Regex too long').optional()
    })
 }

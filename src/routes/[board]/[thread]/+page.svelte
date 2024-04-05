@@ -2,7 +2,7 @@
    import Icon from '@iconify/svelte'
    import { superForm } from 'sveltekit-superforms/client'
    import { menuActive, menuClick, setMenu, workLoad } from '$lib/stores'
-   import { regex, bool, icons, keyboardClick, sign, genders } from '$lib/misc'
+   import { regex, bool, icons, keyboardClick, genders } from '$lib/misc'
 
    import Window from '$lib/ui/Window.svelte'
    import Captcha from '$lib/ui/Captcha.svelte'
@@ -16,6 +16,7 @@
    import { invalidate } from '$app/navigation'
    import { browser } from '$app/environment'
    import { throttle } from 'lodash'
+   import type { Filter, Post as Pozt } from '$lib/types'
 
    export let data
 
@@ -45,14 +46,49 @@
    menuSetup()
 
    // @ts-ignore
-   const checkValidity = (_) => {
+   const checkUserValidity = (_) => {
       if (userValid != data.user.valid) {
          userValid = data.user.valid
          menuSetup({ keep: [0] })
       }
    }
 
-   $: checkValidity(data.user.valid)
+   $: checkUserValidity(data.user.valid)
+
+   const getLocalFilters = () => {
+      return data.user.filters.filter((f) => f.board == data.board.name)
+   }
+
+   $: filtersLocal = data.user.valid ? getLocalFilters() : []
+
+   function filteredp(post: Pozt) {
+      function filterRequisites(f: Filter) {
+         return [
+            f.gender.length > 0,
+            f.race.length > 0,
+            f.name.length > 0,
+            f.comment.length > 0,
+            f.media.length > 0
+         ].filter((x) => x).length
+      }
+
+      return (
+         filtersLocal.filter((f) => {
+            if (f.post) {
+               const frn = filterRequisites(f)
+               let met = 0
+
+               if (post.gender && f.gender.includes(post.gender)) met++
+               if (post.race && f.race.includes(post.race)) met++
+
+               for (const key of ['name', 'comment', 'media'])
+                  if (post[key] && f[key] && f[key].toRegex().test(post[key])) met++
+
+               return met == frn
+            } else return false
+         }).length > 0
+      )
+   }
 
    const listeners = new Map<Element, object>()
 
@@ -62,20 +98,22 @@
             const p = q as HTMLElement
             const id = p.dataset.quote as string
 
-            const qlisteners = {
-               mouseenter: onReplyHover(id),
-               click: scrollToID(id),
-               mouseleave: onReplyLeave(id),
-               mousemove: onReplyMove(id),
-               keydown: keyboardClick
+            if (document.getElementById(id)) {
+               const qlisteners = {
+                  mouseenter: onReplyHover(id),
+                  click: scrollToID(id),
+                  mouseleave: onReplyLeave(id),
+                  mousemove: onReplyMove(id),
+                  keydown: keyboardClick
+               }
+
+               listeners.set(q, qlisteners)
+
+               // prettier-ignore
+               for (const [listener, action] of Object.entries(qlisteners))
+               // @ts-ignore
+                  q.addEventListener(listener, action)
             }
-
-            listeners.set(q, qlisteners)
-
-            // prettier-ignore
-            for (const [listener, action] of Object.entries(qlisteners))
-            // @ts-ignore
-               q.addEventListener(listener, action)
          }
       })
    }
@@ -158,8 +196,6 @@
          message = { text, color, show: false }
       }, 3000)
    }
-
-   sign.reset()
 </script>
 
 {#if data.user.valid}
@@ -179,7 +215,7 @@
    <Post post={data.posts[0]} thread={data.thread} board={data.board} op opno={data.posts[0].no} />
 
    <div class="ml-3 mt-2 form-control gap-2">
-      {#each data.posts.slice(1) as post (post.id)}
+      {#each data.posts.slice(1).filter((p) => !filteredp(p)) as post (post.id)}
          <Post {post} opno={data.posts[0].no} />
       {/each}
    </div>

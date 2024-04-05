@@ -4,7 +4,7 @@
    import Captcha from '$lib/ui/Captcha.svelte'
    import IconToggle from '$lib/ui/IconToggle.svelte'
    import OpImage from '$lib/ui/part/OpImage.svelte'
-   import { workLoad, menuActive, setMenu } from '$lib/stores'
+   import { workLoad, menuActive, setMenu, menuClick, notify } from '$lib/stores'
 
    import { fade, slide } from 'svelte/transition'
    import { flip } from 'svelte/animate'
@@ -20,31 +20,83 @@
       mininfo,
       genders,
       races,
-      stati
+      stati,
+      random
    } from '$lib/misc'
    import { find, throttle } from 'lodash'
    import { invalidate } from '$app/navigation'
+   import type { Filter, Post } from '$lib/types.js'
 
    export let data
 
    let userValid = data.user.valid
 
    const getLocalStars = () => {
-      return data.user.starred.reverse().filter((s) => s.board == data.slug.board)
+      return data.user.starred.reverse().filter((s) => s.board == data.board.name)
    }
 
+   const getLocalFilters = () => {
+      return data.user.filters.filter((f) => f.board == data.board.name)
+   }
+
+   $: filtersLocal = data.user.valid ? getLocalFilters() : []
    $: starredLocal = data.user.valid ? getLocalStars() : []
 
+   function filteredp(op: Post) {
+      function filterRequisites(f: Filter) {
+         return [
+            f.gender.length > 0,
+            f.race.length > 0,
+            f.name.length > 0,
+            f.op && f.subject.length > 0,
+            f.comment.length > 0,
+            f.media.length > 0
+         ].filter((x) => x).length
+      }
+
+      return (
+         filtersLocal.filter((f) => {
+            if (f.op) {
+               const frn = filterRequisites(f)
+               let met = 0
+
+               if (op.gender && f.gender.includes(op.gender)) met++
+               if (op.race && f.race.includes(op.race)) met++
+
+               for (const key of ['name', 'subject', 'comment', 'media'])
+                  if (op[key] && f[key] && f[key].toRegex().test(op[key])) met++
+
+               return met == frn
+            } else return false
+         }).length > 0
+      )
+   }
+
+   const modalToggle = () =>
+      (document.getElementById('settingsModal') as HTMLDialogElement).showModal()
+
    function menuSetup(option: { keep: number[] } | null = null) {
-      if (data.user.valid && getLocalStars().length > 0)
-         setMenu(['gridicons:create', 'bytesize:eye', 'clarity:settings-line'], option)
-      else setMenu(['gridicons:create', 'clarity:settings-line'], option)
+      let menu = ['gridicons:create']
+
+      if (data.user.valid) {
+         if (getLocalStars().length > 0) menu.push('bytesize:eye')
+         menu.push('clarity:settings-line')
+      }
+
+      setMenu(menu, option)
+
+      if (data.user.valid) {
+         $menuClick[getLocalStars().length > 0 ? 2 : 1] = {
+            on: modalToggle,
+            off: modalToggle
+         }
+      }
    }
 
    menuSetup()
 
    // @ts-ignore
-   const checkValidity = (..._) => {
+   const checkUserValidity = (..._) => {
       if (userValid != data.user.valid) {
          userValid = data.user.valid
          menuSetup({ keep: [0] })
@@ -55,7 +107,7 @@
       }
    }
 
-   $: checkValidity(data.user.valid, data.user.starred)
+   $: checkUserValidity(data.user.valid, data.user.starred)
 
    const input = {
       name: '',
@@ -69,6 +121,7 @@
    let fileGiven = false
    let fileOk = false
    let stopTime = false
+   let formSucess = 0
 
    $: canSubmit =
       fileOk &&
@@ -94,10 +147,14 @@
             input.name = ''
             input.subject = ''
             if (input.file) input.file.value = ''
+
+            notify(random.success(), 'success')
+            formSucess++
          } else {
             // @ts-ignore
             const message = Object.entries(result.data.form.errors)[0][1] as string
             showWindowMessage(message, 'error')
+            notify(message, 'error')
          }
 
          if (data.user.valid) {
@@ -135,7 +192,7 @@
    on:keydown={() => null}
    class="grid gap-2 mb-10 ml-2 auto-rows-[250px] min-[490px]:auto-rows-[300px] grid-cols-2 min-[490px]:grid-cols-3 sm:grid-cols-4 min-[867px]:grid-cols-5 lg:grid-cols-6"
 >
-   {#each data.ops as op (op.id)}
+   {#each data.ops.filter((op) => !filteredp(op)) as op (op.id)}
       {@const onHover =
          'hover:h-[120%] hover:w-[130%] hover:-mx-[15%] hover:-translate-x-[0%] hover:z-10'}
       <div
@@ -289,7 +346,7 @@
    bind:message
    title="New Thread"
 >
-   <form method="POST" use:enhance class="form-control gap-2">
+   <form method="POST" action="?/post" use:enhance class="form-control gap-2">
       <div class="flex gap-1">
          <input
             tabindex={$menuActive[0] ? 0 : -1}
@@ -542,6 +599,141 @@
          {/each}
       </nav>
    </Window>
+{/if}
+
+<!-- Settings Modal -->
+{#if data.user.valid}
+   <dialog
+      on:close={() => ($menuActive[starredLocal.length > 0 ? 2 : 1] = false)}
+      class="bg-base-100 w-3/4 max-w-sm rounded-lg"
+      id="settingsModal"
+   >
+      <form method="dialog">
+         <button tabindex={-1} class="btn btn-sm btn-circle btn-ghost absolute right-2 top-2">
+            ✕
+         </button>
+      </form>
+
+      <h3 class="font-bold text-lg mx-auto">
+         <span class="text-primary">/{data.board.name}/</span> filters
+      </h3>
+
+      <!-- Accordion -->
+      <div class="w-full mt-2 text-sm rounded-lg">
+         {#if filtersLocal.length > 0}
+            <div class="collapse collapse-arrow">
+               <input type="checkbox" name="filterAccordion" />
+               <div class="collapse-title font-bold">My Filters</div>
+               <div class="collapse-content">
+                  {#each filtersLocal as filter}
+                     <div class="overflow-y-scroll">
+                        <form class="inline" method="POST" use:enhance action="?/deleteFilter">
+                           <input name="id" type="hidden" value={filter.id} />
+
+                           <button class="translate-y-[3px]" type="submit">
+                              <Icon
+                                 class="hover:text-warning hover:cursor-pointer"
+                                 icon="typcn:delete"
+                              />
+                           </button>
+                        </form>
+
+                        {#each ['op', 'post'] as type}
+                           {#if filter[type]}
+                              <div class="badge badge-xs">{type}</div>
+                           {/if}
+                        {/each}
+
+                        {#each filter.gender as gender}
+                           {@const { color, icon } = icons.gender[gender]}
+                           <Icon class="inline {color}" {icon} width={16} />
+                        {/each}
+
+                        {#each filter.race as race}
+                           {@const icon = icons.race[race]}
+                           <Icon class="inline mr-1" {icon} width={16} />
+                        {/each}
+
+                        {#each [['name', 'primary'], ['subject', 'error'], ['comment', 'success'], ['media', 'warning']] as [key, color]}
+                           {#if filter[key]}
+                              <div class="badge badge-xs text-{color}">
+                                 {filter[key]}
+                              </div>
+                           {/if}
+                        {/each}
+                     </div>
+                  {/each}
+               </div>
+            </div>
+         {/if}
+         {#key formSucess}
+            <div class="collapse collapse-arrow">
+               <input type="checkbox" name="filterAccordion" />
+               <div class="collapse-title font-bold">Add filter</div>
+               <div class="collapse-content">
+                  <form method="POST" action="?/saveFilter" use:enhance class="form-control gap-3">
+                     <div class="flex gap-1 flex-wrap">
+                        {#each ['OP', 'Post'] as bool}
+                           <div class="badge whitespace-nowrap badge-sm">{bool}</div>
+                           <input
+                              name={bool.toLowerCase()}
+                              class="checkbox checkbox-xs mr-2"
+                              type="checkbox"
+                           />
+                        {/each}
+                     </div>
+
+                     <!-- Gender -->
+                     <div class="flexy flex-wrap">
+                        <div class="badge badge-info font-bold badge-sm">Gender</div>
+                        {#each data.board.genders as gender}
+                           {@const { icon, color } = icons.gender[gender]}
+
+                           <IconToggle
+                              interact={true}
+                              tip={gender}
+                              {icon}
+                              {color}
+                              name="gender"
+                              value={gender}
+                           />
+                        {/each}
+                     </div>
+
+                     <!-- Race -->
+                     <div class="flexy flex-wrap">
+                        <div class="badge badge-warning font-bold badge-sm">Race</div>
+                        {#each data.board.races as race}
+                           {@const icon = icons.race[race]}
+                           <IconToggle
+                              interact={true}
+                              size={20}
+                              tip={race}
+                              {icon}
+                              name="race"
+                              value={race}
+                           />
+                        {/each}
+                     </div>
+
+                     <small>Note: For the filters below, you may leave any empty.</small>
+
+                     {#each ['name', 'subject', 'comment', 'media'] as name}
+                        <input
+                           type="text"
+                           {name}
+                           placeholder="{name.titleCase()} filter"
+                           class="input input-bordered input-xs w-full"
+                        />
+                     {/each}
+
+                     <button type="submit" class="btn btn-primary btn-xs w-full">Save</button>
+                  </form>
+               </div>
+            </div>
+         {/key}
+      </div>
+   </dialog>
 {/if}
 
 <style>

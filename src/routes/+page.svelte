@@ -39,7 +39,8 @@
                                  <Icon icon={board.icon} width="22" height="22" />
                               </span>
                               <span class="-translate-x-1">/</span>
-                           {:else}/{board.name}/
+                           {:else}
+                              /{board.name}/
                            {/if}
                         </span>
                      </a>

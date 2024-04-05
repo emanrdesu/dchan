@@ -2,10 +2,10 @@ import schema from '$lib/schema'
 import { pb, Boarb } from '$lib/pocketbase'
 import { intersection } from 'lodash'
 import { error, fail } from '@sveltejs/kit'
-import { deleteReturn, format, calculateMD5 } from '$lib/misc'
+import { deleteReturn, format, calculateMD5, errorer, bool } from '$lib/misc'
 import { setError, superValidate } from 'sveltekit-superforms/server'
 import type { Actions } from './$types'
-import type { Board, Post } from '../../lib/types'
+import type { Board, Filter, Post, User } from '../../lib/types'
 import type { PageServerLoad } from './$types'
 import validate from '$lib/validate'
 
@@ -19,11 +19,116 @@ export const load: PageServerLoad = async ({ params, parent, fetch, depends }) =
    let { message, ops } = await fetch(link).then((r) => r.json())
    if (message) throw error(404, 'This board does not exist.')
 
-   return { slug: { board: params.board }, ops: ops as Post[], form }
+   return { ops: ops as Post[], form }
 }
 
 export const actions: Actions = {
-   default: async ({ request, fetch, params }) => {
+   deleteFilter: async ({ request, fetch }) => {
+      const formData = await request.formData()
+      const id = formData.get('id')
+
+      const form = await superValidate(formData, schema.empty)
+      const user: User = await fetch('/api/user')
+         .then((res) => res.json())
+         .catch(() => {
+            valid: false
+         })
+
+      if (!user.valid) return fail(400, { form })
+      const err = errorer(form)
+      if (!id) return err('foo', 'No filter ID given')
+
+      try {
+         const filter = (await pb
+            .collection('filter')
+            .getOne(id as string, { expand: 'user' })) as Filter
+
+         if ((filter.expand.user as User).id != user.id) {
+            return fail(401, { form })
+         }
+
+         try {
+            await pb.collection('filter').delete(filter.id)
+         } catch {
+            return err('foo', 'Failted to delete filter')
+         }
+      } catch {
+         return err('foo', 'Invalid ID')
+      }
+
+      return { form }
+   },
+
+   saveFilter: async ({ request, fetch, params }) => {
+      const formData = await request.formData()
+      const form = await superValidate(formData, schema.filter)
+      const user: User = await fetch('/api/user')
+         .then((res) => res.json())
+         .catch(() => {
+            valid: false
+         })
+
+      const board: Board | null = await fetch(`/api/${params.board}`)
+         .then((res) => res.json())
+         .catch(() => null)
+
+      if (!user.valid || !board) return fail(400, { form })
+
+      const err = errorer(form)
+
+      const op = formData.get('op')
+      const post = formData.get('post')
+      const genders = formData.getAll('gender')
+      const races = formData.getAll('race')
+
+      const regex = {
+         name: formData.get('name') || '',
+         subject: formData.get('subject') || '',
+         comment: formData.get('comment') || '',
+         media: formData.get('media') || ''
+      }
+
+      // VALIDATION
+      if (
+         genders.length == 0 &&
+         races.length == 0 &&
+         regex.name == '' &&
+         regex.subject == '' &&
+         regex.comment == '' &&
+         regex.media == ''
+      )
+         return err('op', 'Empty filter')
+
+      if (!op && !post) return err('op', 'Must set filter type(s).')
+
+      for (const key of Object.keys(regex) as ('name' | 'subject' | 'comment' | 'media')[])
+         if (regex[key] != '') {
+            try {
+               new RegExp(regex[key] as string, 'g')
+            } catch {
+               return err(key, 'Invalid regular expression')
+            }
+         }
+
+      // CREATION
+      try {
+         await pb.collection('filter').create({
+            user: user.id,
+            board: board.id,
+            op: bool(op),
+            post: bool(post),
+            gender: genders,
+            race: races,
+            ...regex
+         })
+      } catch (e) {
+         return err('op', 'Failed to save filter.')
+      }
+
+      return { form }
+   },
+
+   post: async ({ request, fetch, params }) => {
       const formData = await request.formData()
 
       // delete duplicate newlines
@@ -35,10 +140,7 @@ export const actions: Actions = {
       let user, genders, races, file: File | null, hash: string | null
       hash = null
 
-      const err = (field: any, message: string, status = 400) => {
-         setError(form, field, message)
-         return fail(status, { form })
-      }
+      const err = errorer(form)
 
       /* DATA GATHER */
       {

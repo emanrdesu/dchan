@@ -1,6 +1,6 @@
 <script lang="ts">
    import type { Board, Post, Thread } from '$lib/types'
-   import { sign, format, icons, mininfo, races, genders, stati } from '$lib/misc'
+   import { format, icons, mininfo, races, genders, stati } from '$lib/misc'
    import { fade } from 'svelte/transition'
    import Header from '$lib/ui/part/Header.svelte'
 
@@ -15,10 +15,6 @@
 
    const mediaURL = `/media/${post.id}/${post.media}`
    let imageFull = false
-
-   function randomLength(base: number, add: number) {
-      return sign.flip() * (base + Math.floor(Math.random() * add))
-   }
 </script>
 
 <div

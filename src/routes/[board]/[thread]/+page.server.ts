@@ -1,7 +1,7 @@
 import schema from '$lib/schema'
 import { pb, Boarb, Bread } from '$lib/pocketbase'
 import { error, fail } from '@sveltejs/kit'
-import { deleteReturn, format, calculateMD5 } from '$lib/misc'
+import { deleteReturn, format, calculateMD5, errorer } from '$lib/misc'
 import { setError, superValidate } from 'sveltekit-superforms/server'
 import validate from '$lib/validate'
 
@@ -90,10 +90,7 @@ export const actions: Actions = {
 
       hash = null
 
-      const err = (field: any, message: string, status = 400) => {
-         setError(form, field, message)
-         return fail(status, { form })
-      }
+      const err = errorer(form)
 
       /* DATA GATHER */
       {

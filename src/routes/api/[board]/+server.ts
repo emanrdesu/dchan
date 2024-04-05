@@ -22,5 +22,5 @@ export const GET: RequestHandler = async ({ params, url }) => {
       return json({ ops: ops })
    }
 
-   return json(minify(board, ['updated'], ['category']))
+   return json(minify(board, ['id', 'updated'], ['category']))
 }
